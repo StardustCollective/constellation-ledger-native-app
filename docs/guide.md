@@ -33,7 +33,7 @@ You should now see a home screen that looks like this:
 
 ## Connect your Ledger to Constellation Javascript CLI.
 
-### With your Ledger connected to your computer, ask the Constellation Javascript CLI to show your address.
+### With your Ledger connected to your computer, pull up a command line interface that can run constellationjs.
 
 ## View Account Balance
 ### To view the account balance, run the below command.  
