@@ -2,7 +2,7 @@
 
 ## Introduction
 
-A Different Approach
+Constellation DAG : A Different Approach To Blockchain
 
 ## Requirements
 
