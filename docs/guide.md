@@ -25,11 +25,11 @@ Open Ledger Live Desktop, select “Manager” in the left panel, and install th
 
 ### On your Ledger device, select the newly installed DAG application.
 
-![DAG App Icon](https://i.imgur.com/Qdc8Jex.jpg)
+![DAG App Icon](https://i.imgur.com/b8mj3jY.jpg)
 
 You should now see a home screen that looks like this:
 
-![DAG App Home Screen](https://i.imgur.com/Ri51kn1.jpg)
+![DAG App Home Screen](https://i.imgur.com/MtaSbk3.jpg)
 
 ## Connect your Ledger to Constellation Javascript CLI.
 
