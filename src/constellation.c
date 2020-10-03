@@ -335,16 +335,6 @@ void add_data_to_hash(unsigned char * in, const unsigned int len) {
 	hash_data_ix += len;
 }
 
-void add_base10_to_hash(unsigned char * in, const unsigned int len) {
-	char base10[MAX_TX_TEXT_WIDTH];
-	unsigned int base10_len = encode_base_10(in, len, base10, MAX_TX_TEXT_WIDTH-1, false);
-	unsigned int base10_start = 0;
-	while((base10[base10_start] == '0') && (base10_start < base10_len-1)) {
-		base10_start++;
-	}
-	add_data_to_hash((unsigned char *)base10 + base10_start, base10_len-base10_start);
-}
-
 void add_number_to_hash(const unsigned char number) {
 	if(number > 99) {
 		THROW(0x6D32);
@@ -361,6 +351,18 @@ void add_number_to_hash(const unsigned char number) {
 		hash_data[hash_data_ix++] = '0' + (number/10);
 		hash_data[hash_data_ix++] = '0' + (number % 10);
 	}
+}
+
+void add_base10_and_len_to_hash(unsigned char * in, const unsigned int len) {
+	char base10[MAX_TX_TEXT_WIDTH];
+	unsigned int base10_len = encode_base_10(in, len, base10, MAX_TX_TEXT_WIDTH-1, false);
+	unsigned int base10_start = 0;
+	while((base10[base10_start] == '0') && (base10_start < base10_len-1)) {
+		base10_start++;
+	}
+	unsigned int base10_true_len = base10_len-base10_start;
+	add_number_to_hash(base10_true_len);
+	add_data_to_hash((unsigned char *)base10 + base10_start, base10_true_len);
 }
 
 void calc_hash(void) {
@@ -387,8 +389,7 @@ void calc_hash(void) {
 
 	// // *** decoding amount ***
 	unsigned int amountLen = raw_tx[ix++];
-	add_number_to_hash(amountLen);
-	add_base10_to_hash(raw_tx + ix, amountLen);
+	add_base10_and_len_to_hash(raw_tx + ix, amountLen);
 	ix += amountLen;
 
 	// *** decoding lastTxRefHash
@@ -399,20 +400,17 @@ void calc_hash(void) {
 
 	// *** decoding lastTxRefOrdinal
 	unsigned int lastTxRefOrdinalLen = raw_tx[ix++];
-	add_number_to_hash(lastTxRefOrdinalLen);
-	add_base10_to_hash(raw_tx + ix, lastTxRefOrdinalLen);
+	add_base10_and_len_to_hash(raw_tx + ix, lastTxRefOrdinalLen);
 	ix += lastTxRefOrdinalLen;
 
 	// *** decoding fee
 	unsigned int feeLen = raw_tx[ix++];
-	add_number_to_hash(feeLen);
-	add_base10_to_hash(raw_tx + ix, feeLen);
+	add_base10_and_len_to_hash(raw_tx + ix, feeLen);
 	ix += feeLen;
 
 	// *** decoding salt
 	unsigned int saltLen = raw_tx[ix++];
-	add_number_to_hash(saltLen);
-	add_base10_to_hash(raw_tx + ix, saltLen);
+	add_base10_and_len_to_hash(raw_tx + ix, saltLen);
 	ix += saltLen;
 
 }
