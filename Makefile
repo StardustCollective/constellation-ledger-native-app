@@ -22,7 +22,7 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 
-APPNAME = "Dag"
+APPNAME = "Constellation"
 APPVERSION = 1.0.0
 APP_LOAD_PARAMS = --path "44'/1137'" --appFlags 0x240 --apdu $(COMMON_LOAD_PARAMS)
 APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
@@ -139,4 +139,4 @@ include $(BOLOS_SDK)/Makefile.glyphs
 include $(BOLOS_SDK)/Makefile.rules
 
 listvariants:
-	@echo VARIANTS COIN dag
+	@echo VARIANTS COIN constellation

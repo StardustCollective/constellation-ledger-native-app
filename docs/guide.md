@@ -6,7 +6,7 @@ Constellation DAG : A Different Approach To Blockchain
 
 ## Requirements
 
-To use DAG with a Ledger Nano S Device or a Ledger Nano X Device, you need a Ledger Nano S Device or a Ledger Nano X Device, and need access to the internet.
+To use Constellation with a Ledger Nano S Device or a Ledger Nano X Device, you need a Ledger Nano S Device or a Ledger Nano X Device, and need access to the internet.
 
 We recommend using the Constellation Javascript CLI:
 [Constellation Javascript CLI](https://github.com/StardustCollective/constellationjs)
@@ -23,13 +23,13 @@ Open Ledger Live Desktop, select “Manager” in the left panel, and install th
 
 ![Ledger App Manager](https://i.imgur.com/6IZJVE8.png)
 
-### On your Ledger device, select the newly installed DAG application.
+### On your Ledger device, select the newly installed Constellation application.
 
-![DAG App Icon](https://i.imgur.com/b8mj3jY.jpg)
+![Constellation App Icon](https://i.imgur.com/b8mj3jY.jpg)
 
 You should now see a home screen that looks like this:
 
-![DAG App Home Screen](https://i.imgur.com/MtaSbk3.jpg)
+![Constellation App Home Screen](https://i.imgur.com/MtaSbk3.jpg)
 
 ## Connect your Ledger to Constellation Javascript CLI.
 
