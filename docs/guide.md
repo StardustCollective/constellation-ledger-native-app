@@ -49,6 +49,10 @@ You should now see a home screen that looks like this:
 ## Receive Crypto
 ### To receive crypto, look on the device for the receiving address.
 
+This can be done from the home screen by clicking the right hand button, where the eye is.
+
+![DAG App Home Screen](https://i.imgur.com/MtaSbk3.jpg)
+
 ## Send Crypto
 ### To send crypto, run the below command.   
 
