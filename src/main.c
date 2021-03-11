@@ -178,7 +178,7 @@ static void constellation_main(void) {
 						hashTainted = 1;
 						THROW(0x6D08);
 					}
-					os_memmove(out, in, len);
+					memmove(out, in, len);
 					raw_tx_ix += len;
 
 					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
@@ -187,7 +187,7 @@ static void constellation_main(void) {
 						raw_tx_ix = 0;
 						hash_data_ix = 0;
 						curr_scr_ix = 0;
-						os_memset(tx_desc, 0x00, sizeof(tx_desc));
+						memset(tx_desc, 0x00, sizeof(tx_desc));
 
 						// parse the transaction into human readable text.
 						display_tx_desc();
@@ -247,7 +247,7 @@ static void constellation_main(void) {
 					refresh_public_key_display();
 
 					// push the public key onto the response buffer.
-					os_memmove(G_io_apdu_buffer, publicKey.W, PUBLIC_KEY_LEN);
+					memmove(G_io_apdu_buffer, publicKey.W, PUBLIC_KEY_LEN);
 					tx = PUBLIC_KEY_LEN;
 
 					// return 0x9000 OK.
@@ -301,6 +301,7 @@ void io_seproxyhal_display(const bagl_element_t *element) {
 unsigned char io_event(unsigned char channel) {
 	// nothing done with the event, throw an error on the transport layer if
 	// needed
+	UNUSED(channel);
 
 	// can't have more than one tag in the reply, not supported yet.
 	switch (G_io_seproxyhal_spi_buffer[0]) {
@@ -363,58 +364,72 @@ unsigned char io_event(unsigned char channel) {
 	return 1;
 }
 
+static void app_exit(void)
+{
+	BEGIN_TRY_L(exit) {
+		TRY_L(exit) {
+			os_sched_exit(-1);
+		}
+		FINALLY_L(exit) {
+		}
+	}
+	END_TRY_L(exit);
+}
+
 /** boot up the app and intialize it */
 __attribute__((section(".boot"))) int main(void) {
 	// exit critical section
 	__asm volatile ("cpsie i");
 
-	curr_scr_ix = 0;
-	max_scr_ix = 0;
-	raw_tx_ix = 0;
-	hashTainted = 1;
-	uiState = UI_IDLE;
+	for (;;) {
+		UX_INIT();
+		os_boot();
 
-	// ensure exception will work as planned
-	os_boot();
-
-	UX_INIT();
-
-	BEGIN_TRY
-	{
-		TRY
+		BEGIN_TRY
 		{
-			io_seproxyhal_init();
+			TRY
+			{
+				io_seproxyhal_init();
 
-#ifdef LISTEN_BLE
-			if (os_seph_features() &
-			    SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_BLE) {
-				BLE_power(0, NULL);
-				// restart IOs
-				BLE_power(1, NULL);
+				USB_power(0);
+				USB_power(1);
+
+				curr_scr_ix = 0;
+				max_scr_ix = 0;
+				raw_tx_ix = 0;
+				hashTainted = 1;
+				uiState = UI_IDLE;
+
+				// init the public key display to "no public key".
+				display_no_public_key();
+
+				// show idle screen.
+				ui_idle();
+
+#if defined(LISTEN_BLE) && defined(TARGET_NANOX)
+				if (os_seph_features() &
+						SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_BLE) {
+					BLE_power(0, NULL);
+					// restart IOs
+					BLE_power(1, NULL);
+				}
+#endif // defined(LISTEN_BLE) && defined(TARGET_NANOX)
+
+				// set timer
+				Timer_Set();
+
+				// run main event loop.
+				constellation_main();
 			}
-#endif
-
-			USB_power(0);
-			USB_power(1);
-
-			// init the public key display to "no public key".
-			display_no_public_key();
-
-			// show idle screen.
-			ui_idle();
-
-			// set timer
-			Timer_Set();
-
-			// run main event loop.
-			constellation_main();
+			CATCH_OTHER(e)
+			{
+			}
+			FINALLY
+			{
+			}
 		}
-		CATCH_OTHER(e)
-		{
-		}
-		FINALLY
-		{
-		}
+		END_TRY;
 	}
-	END_TRY;
+	app_exit();
+	return 0;
 }

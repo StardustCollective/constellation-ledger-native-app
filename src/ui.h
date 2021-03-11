@@ -6,6 +6,7 @@
 
 #include "os.h"
 #include "cx.h"
+#include "ux.h"
 #include "hex.h"
 #include "base-encoding.h"
 #include <stdbool.h>

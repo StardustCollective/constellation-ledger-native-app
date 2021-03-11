@@ -1,7 +1,7 @@
 
 
 /** array of capital letter hex values */
-static const char const HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
+static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
 
 /** converts a byte array in src to a hex array in dest, using only dest_len bytes of dest before stopping. */
 void to_hex(char * dest, const unsigned char * src, const unsigned int dest_len) {

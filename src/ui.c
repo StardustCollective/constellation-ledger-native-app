@@ -37,7 +37,7 @@ unsigned char hashTainted;
 /** notification to refresh the view, if we are displaying the public key */
 unsigned char publicKeyNeedsRefresh;
 
-static const char const BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+static const char BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 /** index of the current screen. */
 unsigned int curr_scr_ix;
@@ -69,7 +69,7 @@ unsigned char hash_data[HASH_DATA_SIZE];
 /** hash ix to go into kryto serialize */
 unsigned int hash_data_ix;
 
-static const unsigned char const KRYO_PREFIX[] = {0x03,0x01};
+static const unsigned char KRYO_PREFIX[] = {0x03,0x01};
 
 /** UI was touched indicating the user wants to deny te signature request */
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
@@ -312,13 +312,13 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* center text */
-	{       {       BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Constellation", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Constellation"},
 	/* left icon is a X */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL},
 	/* right icon is an eye. */
-	{       {       BAGL_ICON, 0x00, 117, 11, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_EYE_BADGE }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 117, 11, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_EYE_BADGE }, NULL},
 
 /* */
 };
@@ -329,6 +329,8 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
  * exit on Left button, or on Both buttons. Do nothing on Right button only.
  */
 static unsigned int bagl_ui_idle_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		ui_public_key_1();
@@ -348,15 +350,15 @@ static const bagl_element_t bagl_ui_public_key_nanos_1[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* first line of description of current public key */
-	{       {       BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[0], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[0]},
 	/* second line of description of current public key */
-	{       {       BAGL_LABELINE, 0x02, 10, 21, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[1], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 21, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[1]},
 	/* right icon is a X */
-	{       {       BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL},
 	/* left icon is down arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -366,15 +368,15 @@ static const bagl_element_t bagl_ui_public_key_nanos_2[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* second line of description of current public key */
-	{       {       BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[1], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[1]},
 	/* third line of description of current public key  */
-	{       {       BAGL_LABELINE, 0x02, 10, 21, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[2], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 21, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[2]},
 	/* right icon is a X */
-	{       {       BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
 
 /* */
 };
@@ -385,6 +387,8 @@ static const bagl_element_t bagl_ui_public_key_nanos_2[] = {
  * exit on Left button, or on Both buttons. Do nothing on Right button only.
  */
 static unsigned int bagl_ui_public_key_nanos_1_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		ui_idle();
@@ -405,6 +409,8 @@ static unsigned int bagl_ui_public_key_nanos_1_button(unsigned int button_mask, 
  * exit on Left button, or on Both buttons. Do nothing on Right button only.
  */
 static unsigned int bagl_ui_public_key_nanos_2_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		ui_idle();
@@ -422,17 +428,17 @@ static const bagl_element_t bagl_ui_top_sign_nanos[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* top left bar */
-//	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+//	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* top right bar */
-//	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+//	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* center text */
-	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Review Tx", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Review Tx"},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
 	/* right icon is down arrow */
-	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -442,6 +448,8 @@ static const bagl_element_t bagl_ui_top_sign_nanos[] = {
  * up on Left button, down on right button, sign on both buttons.
  */
 static unsigned int bagl_ui_top_sign_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	/*
 	   case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
@@ -465,17 +473,17 @@ static const bagl_element_t bagl_ui_sign_nanos[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* top left bar */
-	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* top right bar */
-	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* center text */
-	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Sign Tx", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Sign Tx"},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
 	/* right icon is down arrow */
-	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -485,6 +493,8 @@ static const bagl_element_t bagl_ui_sign_nanos[] = {
  * up on Left button, down on right button, sign on both buttons.
  */
 static unsigned int bagl_ui_sign_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
 		io_seproxyhal_touch_approve(NULL);
@@ -506,16 +516,16 @@ static const bagl_element_t bagl_ui_deny_nanos[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* top left bar */
-	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* top right bar */
-	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL},
 	/* center text */
-	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Deny Tx", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Deny Tx"},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
-	{       {       BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
+	{       {       BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -525,6 +535,8 @@ static const bagl_element_t bagl_ui_deny_nanos[] = {
  * up on Left button, down on right button, deny on both buttons.
  */
 static unsigned int bagl_ui_deny_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
 		io_seproxyhal_touch_deny(NULL);
@@ -546,17 +558,17 @@ static const bagl_element_t bagl_ui_tx_desc_nanos_1[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* screen 1 number */
-	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "1/2", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "1/2"},
 	/* first line of description of current screen */
-	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[0], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[0]},
 	/* second line of description of current screen */
-	{       {       BAGL_LABELINE, 0x02, 10, 26, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[1], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 26, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[1]},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
 	/* right icon is down arrow */
-	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -565,17 +577,17 @@ static const bagl_element_t bagl_ui_tx_desc_nanos_2[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* screen 2 number */
-	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "2/2", 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "2/2"},
 	/* second line of description of current screen */
-	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[1], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[1]},
 	/* third line of description of current screen  */
-	{       {       BAGL_LABELINE, 0x02, 10, 26, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[2], 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_LABELINE, 0x02, 10, 26, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[2]},
 	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
 	/* right icon is down arrow */
-	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
 /* */
 };
 
@@ -585,6 +597,8 @@ static const bagl_element_t bagl_ui_tx_desc_nanos_2[] = {
  * up on Left button, down on right button.
  */
 static unsigned int bagl_ui_tx_desc_nanos_1_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		tx_desc_dn(NULL);
@@ -603,6 +617,8 @@ static unsigned int bagl_ui_tx_desc_nanos_1_button(unsigned int button_mask, uns
  * up on Left button, down on right button.
  */
 static unsigned int bagl_ui_tx_desc_nanos_2_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	UNUSED(button_mask_counter);
+
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		tx_desc_dn(NULL);
@@ -619,6 +635,7 @@ static unsigned int bagl_ui_tx_desc_nanos_2_button(unsigned int button_mask, uns
 #ifndef TARGET_NANOX
 /** if the user wants to exit go back to the app dashboard. */
 static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
+	UNUSED(e);
 	// Go back to the dashboard
 	os_sched_exit(0);
 	return NULL;                     // do not redraw the widget
@@ -628,7 +645,7 @@ static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
 #ifndef TARGET_NANOX
 /** copy the current row of the tx_desc buffer into curr_tx_desc to display on the screen */
 static void copy_tx_desc(void) {
-	os_memmove(curr_tx_desc, tx_desc[curr_scr_ix], CURR_TX_DESC_LEN);
+	memmove(curr_tx_desc, tx_desc[curr_scr_ix], CURR_TX_DESC_LEN);
 	curr_tx_desc[0][MAX_TX_TEXT_WIDTH - 1] = '\0';
 	curr_tx_desc[1][MAX_TX_TEXT_WIDTH - 1] = '\0';
 	curr_tx_desc[2][MAX_TX_TEXT_WIDTH - 1] = '\0';
@@ -638,6 +655,8 @@ static void copy_tx_desc(void) {
 #ifndef TARGET_NANOX
 /** processes the Up button */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
+	UNUSED(e);
+
 	switch (uiState) {
 	case UI_TOP_SIGN:
 		ui_deny();
@@ -677,6 +696,8 @@ static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 
 /** processes the Down button */
 static const bagl_element_t * tx_desc_dn(const bagl_element_t *e) {
+	UNUSED(e);
+
 	switch (uiState) {
 	case UI_TOP_SIGN:
 		curr_scr_ix = 0;
@@ -749,6 +770,8 @@ unsigned int utf8Length(unsigned char * buffer, unsigned int value) {
 
 /** processes the transaction approval. the UI is only displayed when all of the TX has been sent over for signing. */
 const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
+	UNUSED(e);
+
   unsigned int tx = 0;
 	if (G_io_apdu_buffer[2] == P1_LAST) {
 		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
@@ -795,7 +818,7 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
     unsigned char result[32];
     memset(result, 0x00, sizeof(result));
-    os_memmove(result, result512, sizeof(result));
+    memmove(result, result512, sizeof(result));
 		// #define CX_LAST (1 << 0)
 		// #define CX_RND_PRNG (1 << 9)
 		// #define CX_RND_TRNG (2 << 9)
@@ -848,6 +871,8 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
 /** deny signing. */
 static const bagl_element_t *io_seproxyhal_touch_deny(const bagl_element_t *e) {
+	UNUSED(e);
+
 	hashTainted = 1;
 	clear_tx_desc();
 	raw_tx_ix = 0;
