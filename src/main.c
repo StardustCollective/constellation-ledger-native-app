@@ -325,6 +325,7 @@ unsigned char io_event(unsigned char channel) {
 		break;
 
 	case SEPROXYHAL_TAG_TICKER_EVENT:
+
 #if defined(TARGET_NANOX)
 		UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {
 		                    // don't redisplay if UX not allowed (pin locked in the common bolos
@@ -335,7 +336,7 @@ unsigned char io_event(unsigned char channel) {
 							}
 						});
 #endif
-//		UX_REDISPLAY();
+
 		Timer_Tick();
 		if (publicKeyNeedsRefresh == 1) {
 			UX_REDISPLAY();
@@ -381,6 +382,17 @@ __attribute__((section(".boot"))) int main(void) {
 	// exit critical section
 	__asm volatile ("cpsie i");
 
+	curr_scr_ix = 0;
+	max_scr_ix = 0;
+	raw_tx_ix = 0;
+	hashTainted = 1;
+	uiState = UI_IDLE;
+
+	// First things first, we need to start the timer.
+	// If for some reason the 'io_event' callback is called with a ticker event,
+	// then the ram space will not be initialized.
+	Timer_Set();
+
 	for (;;) {
 		UX_INIT();
 		os_boot();
@@ -393,12 +405,6 @@ __attribute__((section(".boot"))) int main(void) {
 
 				USB_power(0);
 				USB_power(1);
-
-				curr_scr_ix = 0;
-				max_scr_ix = 0;
-				raw_tx_ix = 0;
-				hashTainted = 1;
-				uiState = UI_IDLE;
 
 				// init the public key display to "no public key".
 				display_no_public_key();

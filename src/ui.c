@@ -22,15 +22,6 @@ char timer_desc[MAX_TIMER_TEXT_WIDTH];
 /** UI state enum */
 enum UI_STATE uiState;
 
-/** UI state flag */
-#ifdef TARGET_NANOX
-#include "ux.h"
-ux_state_t G_ux;
-bolos_ux_params_t G_ux_params;
-#else // TARGET_NANOX
-ux_state_t ux;
-#endif // TARGET_NANOX
-
 /** notification to restart the hash */
 unsigned char hashTainted;
 

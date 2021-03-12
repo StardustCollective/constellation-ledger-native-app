@@ -78,9 +78,6 @@ enum UI_STATE {
 /** UI state enum */
 extern enum UI_STATE uiState;
 
-/** UI state flag */
-extern ux_state_t ux;
-
 /** notification to restart the hash */
 extern unsigned char hashTainted;
 
