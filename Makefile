@@ -22,10 +22,14 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 
-APPNAME = "Dag"
+APPNAME = "Constellation"
 APPVERSION = 1.0.0
 APP_LOAD_PARAMS = --path "44'/1137'" --appFlags 0x240 --apdu $(COMMON_LOAD_PARAMS)
 APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
+
+# Ledger: add the "Pending security review" disclaimer
+APP_LOAD_PARAMS += --tlvraw 9F:01
+DEFINES += HAVE_PENDING_REVIEW_SCREEN
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 ICONNAME=nanox_icon.gif
@@ -135,4 +139,4 @@ include $(BOLOS_SDK)/Makefile.glyphs
 include $(BOLOS_SDK)/Makefile.rules
 
 listvariants:
-	@echo VARIANTS COIN dag
+	@echo VARIANTS COIN constellation

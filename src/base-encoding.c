@@ -4,20 +4,20 @@
 #include "base-encoding.h"
 
 /** array of base10 aplhabet letters */
-static const char const BASE_2_ALPHABET[] = { '0', '1' };
+static const char BASE_2_ALPHABET[] = { '0', '1' };
 
 /** array of base10 aplhabet letters */
-static const char const BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
 
 /** array of base10 alphabet letters */
-static const char const BASE_32_ALPHABET[] = {
+static const char BASE_32_ALPHABET[] = {
 	'1', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 	'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'
 };
 
 /** array of base58 alphabet letters */
-static const char const BASE_58_ALPHABET[] = {
+static const char BASE_58_ALPHABET[] = {
 	'1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q',
 	'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
 	'w', 'x', 'y', 'z'
@@ -76,6 +76,8 @@ static unsigned int divide_and_remainder(const unsigned char * divided, const un
                                          unsigned char * dividend, const unsigned int dividend_len,
                                          const unsigned int divisor, const unsigned int radix,
                                          const bool enable_debug) {
+  UNUSED(enable_debug);
+
 	unsigned int divided_part = 0;
 	unsigned int division_index = 0;
 	const unsigned int max_divisions = divided_len * radix;
@@ -173,17 +175,17 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	// divided (the thing to be divided)
 	// set to all zeros
 	unsigned char divided[BASEX_DIVISION_BUFFER_SIZE];
-	os_memset(divided,0x00,sizeof(divided));
+	memset(divided,0x00,sizeof(divided));
 
 	// dividend (the primary result of division)
 	// set to all zeros
 	unsigned char dividend[BASEX_DIVISION_BUFFER_SIZE];
-	os_memset(dividend,0x00,sizeof(dividend));
+	memset(dividend,0x00,sizeof(dividend));
 
 	// remainders (the secondary result of division, whatever remained after whole number division)
 	// set to all zeros
 	unsigned char remainders[BASEX_DIVISION_BUFFER_SIZE];
-	os_memset(remainders,0x00,sizeof(remainders));
+	memset(remainders,0x00,sizeof(remainders));
 
 	// if out_len is too big, log the actual length, and throw an error.
 	if(out_len > BASEX_DIVISION_BUFFER_SIZE) {
@@ -203,7 +205,7 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	}
 
 	// make the first "divided" be the input.
-	os_memmove(divided, in, in_len_raw);
+	memmove(divided, in, in_len_raw);
 
 	unsigned int working_len = remove_zeros(divided, in_len_raw);
 
@@ -238,9 +240,9 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 
 		remainders_out_ix--;
 
-		os_memmove(divided, dividend, working_len);
+		memmove(divided, dividend, working_len);
 		working_len = remove_zeros(divided, working_len);
-		os_memset(dividend,0x00,sizeof(dividend));
+		memset(dividend,0x00,sizeof(dividend));
 
 		empty_divided = dividedIsEmpty(divided,working_len);
 	}
