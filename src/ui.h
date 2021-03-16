@@ -6,6 +6,7 @@
 
 #include "os.h"
 #include "cx.h"
+#include "ux.h"
 #include "hex.h"
 #include "base-encoding.h"
 #include <stdbool.h>
@@ -76,9 +77,6 @@ enum UI_STATE {
 
 /** UI state enum */
 extern enum UI_STATE uiState;
-
-/** UI state flag */
-extern ux_state_t ux;
 
 /** notification to restart the hash */
 extern unsigned char hashTainted;

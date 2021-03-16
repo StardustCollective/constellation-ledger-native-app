@@ -15,60 +15,60 @@
 unsigned char buffer[MAX_BUFFER_LENGTH];
 
 /** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
-static const char const TXT_BLANK[] = "\0";
+static const char TXT_BLANK[] = "\0";
 
-static const char const TXT_NUM_PARENTS[] = "NUM PARENTS\0";
+static const char TXT_NUM_PARENTS[] = "NUM PARENTS\0";
 
-// static const char const TXT_PARENT[] = "PARENT\0";
+// static const char TXT_PARENT[] = "PARENT\0";
 
-static const char const TXT_LAST_TX_REF_1[] = "LAST TX REF (1/2)\0";
+static const char TXT_LAST_TX_REF_1[] = "LAST TX REF (1/2)\0";
 
-static const char const TXT_LAST_TX_REF_2[] = "LAST TX REF (2/2)\0";
+static const char TXT_LAST_TX_REF_2[] = "LAST TX REF (2/2)\0";
 
-static const char const TXT_LAST_TX_ORDINAL[] = "LAST TX ORDINAL\0";
+static const char TXT_LAST_TX_ORDINAL[] = "LAST TX ORDINAL\0";
 
-static const char const TXT_FEE[] = "FEE\0";
+static const char TXT_FEE[] = "FEE\0";
 
-static const char const TXT_SALT[] = "SALT\0";
+static const char TXT_SALT[] = "SALT\0";
 
-static const char const TXT_ASSET_DAG[] = "$DAG\0";
+static const char TXT_ASSET_DAG[] = "$DAG\0";
 
 /** text to display if an asset's base-10 encoded value is too low to display */
-// static const char const TXT_LOW_VALUE[] = "Low Value\0";
+// static const char TXT_LOW_VALUE[] = "Low Value\0";
 
 /** a period, for displaying the decimal point. */
-// static const char const TXT_PERIOD[] = ".";
+// static const char TXT_PERIOD[] = ".";
 
 /** Label when a public key has not been set yet */
-static const char const NO_PUBLIC_KEY_0[] = "No Public Key\0";
-static const char const NO_PUBLIC_KEY_1[] = "Requested Yet\0";
+static const char NO_PUBLIC_KEY_0[] = "No Public Key\0";
+static const char NO_PUBLIC_KEY_1[] = "Requested Yet\0";
 
-static const char const NO_TX_REF[] = "(No Tx Ref)\0";
+static const char NO_TX_REF[] = "(No Tx Ref)\0";
 
 
-static const char const ADDRESS_PREFIX[] = "DAG\0";
+static const char ADDRESS_PREFIX[] = "DAG\0";
 
-static const unsigned char const PUBLIC_KEY_PREFIX[] = {
+static const unsigned char PUBLIC_KEY_PREFIX[] = {
 	0x30,0x56,0x30,0x10,0x06,0x07,0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x05,0x2b,0x81,0x04,0x00,0x0a,0x03,0x42,0x00
 };
 
 void display_no_public_key() {
-	os_memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
-	os_memmove(current_public_key[1], TXT_BLANK, sizeof(TXT_BLANK));
-	os_memmove(current_public_key[2], TXT_BLANK, sizeof(TXT_BLANK));
-	os_memmove(current_public_key[0], NO_PUBLIC_KEY_0, sizeof(NO_PUBLIC_KEY_0));
-	os_memmove(current_public_key[1], NO_PUBLIC_KEY_1, sizeof(NO_PUBLIC_KEY_1));
+	memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[1], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[2], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[0], NO_PUBLIC_KEY_0, sizeof(NO_PUBLIC_KEY_0));
+	memmove(current_public_key[1], NO_PUBLIC_KEY_1, sizeof(NO_PUBLIC_KEY_1));
 	publicKeyNeedsRefresh = 0;
 }
 
 void display_public_key(const unsigned char * public_key) {
-	os_memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
-	os_memmove(current_public_key[1], TXT_BLANK, sizeof(TXT_BLANK));
-	os_memmove(current_public_key[2], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[1], TXT_BLANK, sizeof(TXT_BLANK));
+	memmove(current_public_key[2], TXT_BLANK, sizeof(TXT_BLANK));
 
 	unsigned char public_key_encoded[PUBLIC_KEY_ENCODED_LEN];
-	os_memmove(public_key_encoded, PUBLIC_KEY_PREFIX, PUBLIC_KEY_PREFIX_LEN);
-	os_memmove(public_key_encoded + PUBLIC_KEY_PREFIX_LEN, public_key, PUBLIC_KEY_LEN);
+	memmove(public_key_encoded, PUBLIC_KEY_PREFIX, PUBLIC_KEY_PREFIX_LEN);
+	memmove(public_key_encoded + PUBLIC_KEY_PREFIX_LEN, public_key, PUBLIC_KEY_LEN);
 
 	unsigned char address_hash_result[CX_SHA256_SIZE];
 	cx_hash_sha256(public_key_encoded, PUBLIC_KEY_ENCODED_LEN, address_hash_result, CX_SHA256_SIZE);
@@ -77,7 +77,7 @@ void display_public_key(const unsigned char * public_key) {
 	encode_base_58(address_hash_result, CX_SHA256_SIZE, base58_encoded, BASE58_ENCODED_ADDRESS_LEN, false);
 
 	char end[BASE58_ENCODED_ADDRESS_SUFFIX_LEN];
-	os_memmove(end, base58_encoded + BASE58_ENCODED_ADDRESS_LEN - BASE58_ENCODED_ADDRESS_SUFFIX_LEN, BASE58_ENCODED_ADDRESS_SUFFIX_LEN);
+	memmove(end, base58_encoded + BASE58_ENCODED_ADDRESS_LEN - BASE58_ENCODED_ADDRESS_SUFFIX_LEN, BASE58_ENCODED_ADDRESS_SUFFIX_LEN);
 
 	int sum = 0;
 	for(int i = 0; i < BASE58_ENCODED_ADDRESS_SUFFIX_LEN; i++) {
@@ -92,9 +92,9 @@ void display_public_key(const unsigned char * public_key) {
 	par[0] = '0' + (sum % 9);
 
 	char address[ADDRESS_LEN];
-	os_memmove(address, ADDRESS_PREFIX, 3);
-	os_memmove(address + 3, par, 1);
-	os_memmove(address + 4, end, BASE58_ENCODED_ADDRESS_SUFFIX_LEN);
+	memmove(address, ADDRESS_PREFIX, 3);
+	memmove(address + 3, par, 1);
+	memmove(address + 4, end, BASE58_ENCODED_ADDRESS_SUFFIX_LEN);
 	unsigned int address_len_0 = 13;
 	unsigned int address_len_1 = 13;
 	unsigned int address_len_2 = 14;
@@ -102,9 +102,9 @@ void display_public_key(const unsigned char * public_key) {
 	char * address_1 = address + address_len_0;
 	char * address_2 = address + address_len_0 + address_len_1;
 
-	os_memmove(current_public_key[0], address_0, address_len_0);
-	os_memmove(current_public_key[1], address_1, address_len_1);
-	os_memmove(current_public_key[2], address_2, address_len_2);
+	memmove(current_public_key[0], address_0, address_len_0);
+	memmove(current_public_key[1], address_1, address_len_1);
+	memmove(current_public_key[2], address_2, address_len_2);
 	publicKeyNeedsRefresh = 0;
 }
 
@@ -160,22 +160,22 @@ void display_tx_desc() {
 		hex_buffer_len = min(MAX_HEX_BUFFER_LEN, sizeof(num_parents) * 2);
 		to_hex(hex_buffer, (unsigned char *) &num_parents, hex_buffer_len);
 
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_NUM_PARENTS, sizeof(TXT_NUM_PARENTS));
-		os_memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len);
-		os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_NUM_PARENTS, sizeof(TXT_NUM_PARENTS));
+		memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len);
+		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
 
 	for(int parent_ix = 0; parent_ix < num_parents; parent_ix++ ) {
-		os_memset(buffer, 0x00, sizeof(buffer));
+		memset(buffer, 0x00, sizeof(buffer));
 		int buffer_len = next_raw_tx();
 		if(buffer_len >= MAX_BUFFER_LENGTH) {
 			THROW(0x6D04);
 		}
 
 		// read the parent.
-		os_memset(buffer, 0x00, sizeof(buffer));
+		memset(buffer, 0x00, sizeof(buffer));
 		next_raw_tx_arr(buffer,buffer_len);
 
 		unsigned char * buffer_0 = buffer;
@@ -183,10 +183,10 @@ void display_tx_desc() {
 		unsigned char * buffer_2 = buffer_1 + MAX_TX_TEXT_WIDTH;
 
 		if (scr_ix < MAX_TX_TEXT_SCREENS) {
-			os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-			os_memmove(tx_desc[scr_ix][0], buffer_0, MAX_TX_TEXT_WIDTH-1);
-			os_memmove(tx_desc[scr_ix][1], buffer_1, MAX_TX_TEXT_WIDTH-1);
-			os_memmove(tx_desc[scr_ix][2], buffer_2, MAX_TX_TEXT_WIDTH-1);
+			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+			memmove(tx_desc[scr_ix][0], buffer_0, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][1], buffer_1, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][2], buffer_2, MAX_TX_TEXT_WIDTH-1);
 
 			scr_ix++;
 		}
@@ -197,15 +197,15 @@ void display_tx_desc() {
 		THROW(0x6D06);
 	}
 	// read the parent.
-	os_memset(buffer, 0x00, sizeof(buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 
 	// display the value
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
 		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
-		os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
 
@@ -214,32 +214,32 @@ void display_tx_desc() {
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
-	os_memset(buffer, 0x00, sizeof(buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
 		unsigned char * buffer_0 = buffer;
 		unsigned char * buffer_1 = buffer_0 + (MAX_TX_TEXT_WIDTH-1);
 		unsigned char * buffer_2 = buffer_1 + (MAX_TX_TEXT_WIDTH-1);
 		unsigned char * buffer_3 = buffer_2 + (MAX_TX_TEXT_WIDTH-1);
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_1, sizeof(TXT_LAST_TX_REF_1));
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_1, sizeof(TXT_LAST_TX_REF_1));
 		if(buffer_len == 0) {
-			os_memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
-			os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+			memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
+			memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		} else {
-			os_memmove(tx_desc[scr_ix][1], buffer_0, MAX_TX_TEXT_WIDTH-1);
-			os_memmove(tx_desc[scr_ix][2], buffer_1, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][1], buffer_0, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][2], buffer_1, MAX_TX_TEXT_WIDTH-1);
 		}
 		scr_ix++;
 		if (scr_ix < MAX_TX_TEXT_SCREENS) {
-			os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-			os_memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_2, sizeof(TXT_LAST_TX_REF_2));
+			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+			memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_2, sizeof(TXT_LAST_TX_REF_2));
 			if(buffer_len == 0) {
-				os_memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
-				os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+				memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
+				memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 			} else {
-				os_memmove(tx_desc[scr_ix][1], buffer_2, MAX_TX_TEXT_WIDTH-1);
-				os_memmove(tx_desc[scr_ix][2], buffer_3, MAX_TX_TEXT_WIDTH-1);
+				memmove(tx_desc[scr_ix][1], buffer_2, MAX_TX_TEXT_WIDTH-1);
+				memmove(tx_desc[scr_ix][2], buffer_3, MAX_TX_TEXT_WIDTH-1);
 			}
 			scr_ix++;
 		}
@@ -250,13 +250,13 @@ void display_tx_desc() {
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
-	os_memset(buffer, 0x00, sizeof(buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_LAST_TX_ORDINAL, sizeof(TXT_LAST_TX_ORDINAL));
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_LAST_TX_ORDINAL, sizeof(TXT_LAST_TX_ORDINAL));
 		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
-		os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
 
@@ -265,13 +265,13 @@ void display_tx_desc() {
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
-	os_memset(buffer, 0x00, sizeof(buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_FEE, sizeof(TXT_FEE));
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_FEE, sizeof(TXT_FEE));
 		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
-		os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
 
@@ -281,7 +281,7 @@ void display_tx_desc() {
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
-	os_memset(buffer, 0x00, sizeof(buffer));
+	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
 		char hex_buffer[MAX_TX_TEXT_WIDTH * 4];
@@ -292,19 +292,19 @@ void display_tx_desc() {
 		unsigned int hex_buffer_len_1 = max(0,min(MAX_TX_TEXT_WIDTH, hex_buffer_len));
 		unsigned int hex_buffer_len_2 = max(0,min(MAX_TX_TEXT_WIDTH, hex_buffer_len - MAX_TX_TEXT_WIDTH));
 
-		os_memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		os_memmove(tx_desc[scr_ix][0], TXT_SALT, sizeof(TXT_SALT));
-		os_memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len_1);
-		os_memmove(tx_desc[scr_ix][2], hex_buffer + MAX_TX_TEXT_WIDTH, hex_buffer_len_2);
+		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
+		memmove(tx_desc[scr_ix][0], TXT_SALT, sizeof(TXT_SALT));
+		memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len_1);
+		memmove(tx_desc[scr_ix][2], hex_buffer + MAX_TX_TEXT_WIDTH, hex_buffer_len_2);
 		scr_ix++;
 	}
 
 	max_scr_ix = scr_ix;
 
 	while(scr_ix < MAX_TX_TEXT_SCREENS) {
-		os_memmove(tx_desc[scr_ix][0], TXT_BLANK, sizeof(TXT_BLANK));
-		os_memmove(tx_desc[scr_ix][1], TXT_BLANK, sizeof(TXT_BLANK));
-		os_memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][0], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][1], TXT_BLANK, sizeof(TXT_BLANK));
+		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 
 		scr_ix++;
 	}
