@@ -389,7 +389,7 @@ void calc_hash(void) {
 
 	// // *** decoding amount ***
 	unsigned int amountLen = raw_tx[ix++];
-	add_base10_and_len_to_hash(raw_tx + ix, amountLen);
+	add_hex_data_to_hash(raw_tx + ix, amountLen);
 	ix += amountLen;
 
 	// *** decoding lastTxRefHash
@@ -410,7 +410,7 @@ void calc_hash(void) {
 
 	// *** decoding salt
 	unsigned int saltLen = raw_tx[ix++];
-	add_base10_and_len_to_hash(raw_tx + ix, saltLen);
+	add_hex_data_to_hash(raw_tx + ix, saltLen);
 	ix += saltLen;
 
 }
