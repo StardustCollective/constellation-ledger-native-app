@@ -1,4 +1,4 @@
-# blue-app-constellation
+# app-constellation
 
     fulfills this issue:
     https://github.com/Constellation-Labs/constellation/issues/671
@@ -6,7 +6,7 @@
 
 # to test use the CLI:
 
-    https://github.com/StardustCollective/constellationjs
+    https://github.com/StardustCollective/constellation-ledger-refjs
 
 # nano s
      export BOLOS_SDK=/home/coranos/git/LedgerHQ/nanos-secure-sdk
