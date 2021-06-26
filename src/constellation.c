@@ -399,8 +399,8 @@ void add_base10_and_len_to_hash(unsigned char * in, const unsigned int len) {
 }
 
 void add_base16_and_len_to_hash(unsigned char * in, const unsigned int len) {
-	char base16[MAX_TX_TEXT_WIDTH];
-	unsigned int base16_len = encode_base_16(in, len, base16, MAX_TX_TEXT_WIDTH-1, false);
+	char base16[MAX_TX_TEXT_WIDTH*2];
+	unsigned int base16_len = encode_base_16(in, len, base16, sizeof(base16)-1, false);
 	unsigned int base16_start = 0;
 	while((base16[base16_start] == '0') && (base16_start < base16_len-1)) {
 		base16_start++;

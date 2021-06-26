@@ -10,7 +10,7 @@ static const char BASE_2_ALPHABET[] = { '0', '1' };
 static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
 /** array of base16 alphabet letters */
-static const char BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+static const char BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 /** array of base10 alphabet letters */
 static const char BASE_32_ALPHABET[] = {
