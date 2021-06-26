@@ -34,10 +34,10 @@ static const char TXT_SALT[] = "SALT\0";
 static const char TXT_ASSET_DAG[] = "$DAG\0";
 
 /** text to display if an asset's base-10 encoded value is too low to display */
-// static const char TXT_LOW_VALUE[] = "Low Value\0";
+static const char TXT_LOW_VALUE[] = "Low Value\0";
 
 /** a period, for displaying the decimal point. */
-// static const char TXT_PERIOD[] = ".";
+static const char TXT_PERIOD[] = ".";
 
 /** Label when a public key has not been set yet */
 static const char NO_PUBLIC_KEY_0[] = "No Public Key\0";
@@ -51,6 +51,25 @@ static const char ADDRESS_PREFIX[] = "DAG\0";
 static const unsigned char PUBLIC_KEY_PREFIX[] = {
 	0x30,0x56,0x30,0x10,0x06,0x07,0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x05,0x2b,0x81,0x04,0x00,0x0a,0x03,0x42,0x00
 };
+
+
+/** converts a value to base10 with a decimal point at DECIMAL_PLACE_OFFSET, which should be 100,000,000 or 100 million, thus the suffix 100m */
+static void to_base10_100m(const unsigned char * value, const unsigned int value_len, char * dest, const unsigned int dest_len) {
+
+	// encode in base10
+	char base10_buffer[MAX_TX_TEXT_WIDTH];
+	unsigned int buffer_len = encode_base_10(value, value_len, base10_buffer, MAX_TX_TEXT_WIDTH, false);
+
+	// place the decimal place.
+	unsigned int dec_place_ix = buffer_len - DECIMAL_PLACE_OFFSET;
+	if (buffer_len < DECIMAL_PLACE_OFFSET) {
+		os_memmove(dest, TXT_LOW_VALUE, sizeof(TXT_LOW_VALUE));
+	} else {
+		os_memmove(dest + dec_place_ix, TXT_PERIOD, sizeof(TXT_PERIOD));
+		os_memmove(dest, base10_buffer, dec_place_ix);
+		os_memmove(dest + dec_place_ix + 1, base10_buffer + dec_place_ix, buffer_len - dec_place_ix);
+	}
+}
 
 void display_no_public_key() {
 	memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
@@ -204,7 +223,17 @@ void display_tx_desc() {
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
 		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 		memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
-		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
+
+	  to_base10_100m(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1);
+		unsigned char found_nonzero = 0;
+		for(int zero_ix = 0; (zero_ix < MAX_TX_TEXT_WIDTH-2) && (found_nonzero == 0); zero_ix++) {
+			if(tx_desc[scr_ix][1][zero_ix] == '0') {
+				tx_desc[scr_ix][1][zero_ix] = ' ';
+			} else {
+				found_nonzero = 1;
+			}
+		}
+		// encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
 		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
