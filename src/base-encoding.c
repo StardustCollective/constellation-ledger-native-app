@@ -3,12 +3,14 @@
  */
 #include "base-encoding.h"
 
-/** array of base10 aplhabet letters */
+/** array of base10 alphabet letters */
 static const char BASE_2_ALPHABET[] = { '0', '1' };
 
-/** array of base10 aplhabet letters */
+/** array of base10 alphabet letters */
 static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+/** array of base16 alphabet letters */
+static const char BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 /** array of base10 alphabet letters */
 static const char BASE_32_ALPHABET[] = {
@@ -36,11 +38,20 @@ unsigned int encode_base_2(const void *in, const unsigned int in_length,
 	return encode_base_x(BASE_2_ALPHABET, sizeof(BASE_10_ALPHABET), in, in_length, out, out_length,
 	                     enable_debug);
 }
+
 /** encodes in_length bytes from in into base-10, writes the converted bytes to out, stopping when it converts out_length bytes.  */
 unsigned int encode_base_10(const void *in, const unsigned int in_length,
                             char *out, const unsigned int out_length,
                             const bool enable_debug) {
 	return encode_base_x(BASE_10_ALPHABET, sizeof(BASE_10_ALPHABET), in, in_length, out, out_length,
+	                     enable_debug);
+}
+
+/** encodes in_length bytes from in into base-10, writes the converted bytes to out, stopping when it converts out_length bytes.  */
+unsigned int encode_base_16(const void *in, const unsigned int in_length,
+                            char *out, const unsigned int out_length,
+                            const bool enable_debug) {
+	return encode_base_x(BASE_16_ALPHABET, sizeof(BASE_16_ALPHABET), in, in_length, out, out_length,
 	                     enable_debug);
 }
 
