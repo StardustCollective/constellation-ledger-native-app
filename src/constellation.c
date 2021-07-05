@@ -34,10 +34,10 @@ static const char TXT_SALT[] = "SALT\0";
 static const char TXT_ASSET_DAG[] = "$DAG\0";
 
 /** text to display if an asset's base-10 encoded value is too low to display */
-// static const char TXT_LOW_VALUE[] = "Low Value\0";
+static const char TXT_LOW_VALUE[] = "Low Value\0";
 
 /** a period, for displaying the decimal point. */
-// static const char TXT_PERIOD[] = ".";
+static const char TXT_PERIOD[] = ".";
 
 /** Label when a public key has not been set yet */
 static const char NO_PUBLIC_KEY_0[] = "No Public Key\0";
@@ -51,6 +51,25 @@ static const char ADDRESS_PREFIX[] = "DAG\0";
 static const unsigned char PUBLIC_KEY_PREFIX[] = {
 	0x30,0x56,0x30,0x10,0x06,0x07,0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x05,0x2b,0x81,0x04,0x00,0x0a,0x03,0x42,0x00
 };
+
+
+/** converts a value to base10 with a decimal point at DECIMAL_PLACE_OFFSET, which should be 100,000,000 or 100 million, thus the suffix 100m */
+static void to_base10_100m(const unsigned char * value, const unsigned int value_len, char * dest, const unsigned int dest_len) {
+
+	// encode in base10
+	char base10_buffer[MAX_TX_TEXT_WIDTH];
+	unsigned int buffer_len = encode_base_10(value, value_len, base10_buffer, MAX_TX_TEXT_WIDTH, false);
+
+	// place the decimal place.
+	unsigned int dec_place_ix = buffer_len - DECIMAL_PLACE_OFFSET;
+	if (buffer_len < DECIMAL_PLACE_OFFSET) {
+		os_memmove(dest, TXT_LOW_VALUE, sizeof(TXT_LOW_VALUE));
+	} else {
+		os_memmove(dest + dec_place_ix, TXT_PERIOD, sizeof(TXT_PERIOD));
+		os_memmove(dest, base10_buffer, dec_place_ix);
+		os_memmove(dest + dec_place_ix + 1, base10_buffer + dec_place_ix, buffer_len - dec_place_ix);
+	}
+}
 
 void display_no_public_key() {
 	memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
@@ -146,6 +165,17 @@ static unsigned int max(unsigned int i0, unsigned int i1) {
 	}
 }
 
+static void remove_leading_zeros(unsigned int scr_ix, unsigned int line_ix) {
+	unsigned char found_nonzero = 0;
+	for(int zero_ix = 0; (zero_ix < MAX_TX_TEXT_WIDTH-2) && (found_nonzero == 0); zero_ix++) {
+		if(tx_desc[scr_ix][line_ix][zero_ix] == '0') {
+			tx_desc[scr_ix][line_ix][zero_ix] = ' ';
+		} else {
+			found_nonzero = 1;
+		}
+	}
+}
+
 /** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
 /** only parse out the send-to address and amount from the txos, skip the rest.  */
 void display_tx_desc() {
@@ -204,7 +234,11 @@ void display_tx_desc() {
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
 		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 		memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
-		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
+
+		to_base10_100m(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1);
+		remove_leading_zeros(scr_ix,1);
+
+		// encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
 		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
@@ -310,7 +344,6 @@ void display_tx_desc() {
 	}
 }
 
-
 void add_hex_data_to_hash(unsigned char * in, const unsigned int len) {
 	char dest[2];
 	for(unsigned int copy_ix = 0; copy_ix < len; copy_ix++) {
@@ -365,6 +398,18 @@ void add_base10_and_len_to_hash(unsigned char * in, const unsigned int len) {
 	add_data_to_hash((unsigned char *)base10 + base10_start, base10_true_len);
 }
 
+void add_base16_and_len_to_hash(unsigned char * in, const unsigned int len) {
+	char base16[MAX_TX_TEXT_WIDTH*2];
+	unsigned int base16_len = encode_base_16(in, len, base16, sizeof(base16)-1, false);
+	unsigned int base16_start = 0;
+	while((base16[base16_start] == '0') && (base16_start < base16_len-1)) {
+		base16_start++;
+	}
+	unsigned int base16_true_len = base16_len-base16_start;
+	add_number_to_hash(base16_true_len);
+	add_data_to_hash((unsigned char *)base16 + base16_start, base16_true_len);
+}
+
 void calc_hash(void) {
 
 	// decoding hash
@@ -379,17 +424,17 @@ void calc_hash(void) {
 	add_number_to_hash(maxParents);
 
 	for(unsigned int parentIx = 0; parentIx < maxParents; parentIx++) {
-	 unsigned int parentLen = raw_tx[ix++];
-	 // add parent length to hash
-	 add_number_to_hash(parentLen);
-	 // add parent to hash
-	 add_data_to_hash(raw_tx + ix, parentLen);
-	 ix += parentLen;
+		unsigned int parentLen = raw_tx[ix++];
+		// add parent length to hash
+		add_number_to_hash(parentLen);
+		// add parent to hash
+		add_data_to_hash(raw_tx + ix, parentLen);
+		ix += parentLen;
 	}
 
 	// // *** decoding amount ***
 	unsigned int amountLen = raw_tx[ix++];
-	add_base10_and_len_to_hash(raw_tx + ix, amountLen);
+	add_base16_and_len_to_hash(raw_tx + ix, amountLen);
 	ix += amountLen;
 
 	// *** decoding lastTxRefHash
@@ -410,7 +455,7 @@ void calc_hash(void) {
 
 	// *** decoding salt
 	unsigned int saltLen = raw_tx[ix++];
-	add_base10_and_len_to_hash(raw_tx + ix, saltLen);
+	add_base16_and_len_to_hash(raw_tx + ix, saltLen);
 	ix += saltLen;
 
 }
