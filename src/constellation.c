@@ -58,7 +58,7 @@ static void to_base10_100m(const unsigned char * value, const unsigned int value
 
 	// encode in base10
 	char base10_buffer[MAX_TX_TEXT_WIDTH];
-	unsigned int buffer_len = encode_base_10(value, value_len, base10_buffer, MAX_TX_TEXT_WIDTH, false);
+	unsigned int buffer_len = encode_base_10(value, value_len, base10_buffer, MAX_TX_TEXT_WIDTH-1, false);
 
 	// place the decimal place.
 	unsigned int dec_place_ix = buffer_len - DECIMAL_PLACE_OFFSET;
@@ -167,11 +167,20 @@ static unsigned int max(unsigned int i0, unsigned int i1) {
 
 static void remove_leading_zeros(unsigned int scr_ix, unsigned int line_ix) {
 	unsigned char found_nonzero = 0;
-	for(int zero_ix = 0; (zero_ix < MAX_TX_TEXT_WIDTH-2) && (found_nonzero == 0); zero_ix++) {
-		if(tx_desc[scr_ix][line_ix][zero_ix] == '0') {
-			tx_desc[scr_ix][line_ix][zero_ix] = ' ';
-		} else {
+	unsigned int nonzero_ix = 0;
+	for(unsigned int zero_ix = 0; (zero_ix < MAX_TX_TEXT_WIDTH-1) && (found_nonzero == 0); zero_ix++) {
+		nonzero_ix = zero_ix;
+		if(tx_desc[scr_ix][line_ix][zero_ix] != '0') {
 			found_nonzero = 1;
+		}
+	}
+	if(nonzero_ix > 0) {
+		for(unsigned int ix = 0; ix < MAX_TX_TEXT_WIDTH; ix++) {
+			if(ix <=  MAX_TX_TEXT_WIDTH - nonzero_ix) {
+				tx_desc[scr_ix][line_ix][ix] = tx_desc[scr_ix][line_ix][ix + nonzero_ix];
+			} else {
+				tx_desc[scr_ix][line_ix][ix] = '\0';
+			}
 		}
 	}
 }
@@ -290,6 +299,7 @@ void display_tx_desc() {
 		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 		memmove(tx_desc[scr_ix][0], TXT_LAST_TX_ORDINAL, sizeof(TXT_LAST_TX_ORDINAL));
 		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
+		remove_leading_zeros(scr_ix,1);
 		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
@@ -305,6 +315,7 @@ void display_tx_desc() {
 		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 		memmove(tx_desc[scr_ix][0], TXT_FEE, sizeof(TXT_FEE));
 		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
+		remove_leading_zeros(scr_ix,1);
 		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
