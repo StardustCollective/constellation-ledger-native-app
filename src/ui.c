@@ -694,12 +694,11 @@ static const bagl_element_t * tx_desc_dn(const bagl_element_t *e) {
 		copy_tx_desc();
 		ui_display_tx_desc_1();
 		break;
+	// case UI_TX_DESC_1:
+	// 	ui_display_tx_desc_2();
+	// 	break;
 
 	case UI_TX_DESC_1:
-		ui_display_tx_desc_2();
-		break;
-
-	case UI_TX_DESC_2:
 		if (curr_scr_ix == max_scr_ix - 1) {
 			ui_sign();
 		} else {
