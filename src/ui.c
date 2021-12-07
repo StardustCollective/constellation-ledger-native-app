@@ -111,7 +111,7 @@ UX_STEP_NOCB(
         // number of parents.
         tx_desc[0][0],
         tx_desc[0][1],
-        // tx_desc[0][2]
+        tx_desc[0][2]
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_3_step,
@@ -551,7 +551,6 @@ static const bagl_element_t bagl_ui_tx_desc_nanos_1[] = {
 // },
 	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
 	/* screen 1 number */
-	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "1/2"},
 	/* first line of description of current screen */
 	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[0]},
 	/* second line of description of current screen */
@@ -926,9 +925,9 @@ static void ui_display_tx_desc_1(void) {
 /** show the transaction description screen. */
 static void ui_display_tx_desc_2(void) {
 	uiState = UI_TX_DESC_2;
-#if defined(TARGET_NANOS)
-	UX_DISPLAY(bagl_ui_tx_desc_nanos_2, NULL);
-#endif // #if TARGET_ID
+// #if defined(TARGET_NANOS)
+// 	UX_DISPLAY(bagl_ui_tx_desc_nanos_2, NULL);
+// #endif // #if TARGET_ID
 }
 
 /** show the bottom "Sign Transaction" screen. */
