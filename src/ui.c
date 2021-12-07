@@ -111,7 +111,7 @@ UX_STEP_NOCB(
         // number of parents.
         tx_desc[0][0],
         tx_desc[0][1],
-        tx_desc[0][2]
+        // tx_desc[0][2]
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_3_step,
