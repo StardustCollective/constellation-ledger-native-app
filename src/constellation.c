@@ -21,6 +21,12 @@ static const char TXT_NUM_PARENTS[] = "NUM PARENTS\0";
 
 // static const char TXT_PARENT[] = "PARENT\0";
 
+static const char FROM_ADDRESS[] = "From Address\0";
+
+static const char TO_ADDRESS[] = "To Address\0";
+
+static const char ELLIPSES[] = "...\0";
+
 static const char TXT_LAST_TX_REF_1[] = "LAST TX REF (1/2)\0";
 
 static const char TXT_LAST_TX_REF_2[] = "LAST TX REF (2/2)\0";
@@ -223,9 +229,22 @@ void display_tx_desc() {
 
 		if (scr_ix < MAX_TX_TEXT_SCREENS) {
 			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-			memmove(tx_desc[scr_ix][0], buffer_0, MAX_TX_TEXT_WIDTH-1);
-			memmove(tx_desc[scr_ix][1], buffer_1, MAX_TX_TEXT_WIDTH-1);
-			memmove(tx_desc[scr_ix][2], buffer_2, MAX_TX_TEXT_WIDTH-1);
+
+			auto header = (parent_ix == 0) ? FROM_ADDRESS : TO_ADDRESS;
+			char shortAddress[20] = "";
+            char subBuffStart[5];
+            char subBuffEnd[5];
+
+            memcpy(subBuffStart, &buffer_0[0], 6);
+            memcpy(subBuffEnd, &buffer_2[strlen(buffer_2) - 5], 6);
+
+            strcat(shortAddress, subBuffStart);
+            strcat(shortAddress, ELLIPSES);
+            strcat(shortAddress, subBuffEnd);
+            
+            memmove(tx_desc[scr_ix][0], header, MAX_TX_TEXT_WIDTH-1);
+            memmove(tx_desc[scr_ix][1], shortAddress, MAX_TX_TEXT_WIDTH-1);
+            memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 
 			scr_ix++;
 		}
