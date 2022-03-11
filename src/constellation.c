@@ -486,6 +486,4 @@ void calc_hash(void) {
 	// *** decoding salt
 	unsigned int saltLen = raw_tx[ix++];
 	add_base16_and_len_to_hash(raw_tx + ix, saltLen);
-	ix += saltLen;
-
 }

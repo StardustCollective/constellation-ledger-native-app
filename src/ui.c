@@ -65,7 +65,7 @@ static const unsigned char KRYO_PREFIX[] = {0x03,0x01};
 /** UI was touched indicating the user wants to deny te signature request */
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** UI was touched indicating the user wants to exit the app */
 static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
 
@@ -94,7 +94,7 @@ static const bagl_element_t * tx_desc_dn(const bagl_element_t *e);
 static void clear_tx_desc(void);
 
 ////////////////////////////////////  NANO X //////////////////////////////////////////////////
-#ifdef TARGET_NANOX
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 
 UX_STEP_NOCB(
     ux_confirm_single_flow_1_step,
@@ -296,7 +296,7 @@ UX_FLOW(ux_idle_flow,
 
 
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 
 /** UI struct for the idle screen */
 static const bagl_element_t bagl_ui_idle_nanos[] = {
@@ -621,7 +621,7 @@ static unsigned int bagl_ui_tx_desc_nanos_2_button(unsigned int button_mask, uns
 }
 #endif
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** if the user wants to exit go back to the app dashboard. */
 static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
 	UNUSED(e);
@@ -631,7 +631,7 @@ static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
 }
 #endif
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** copy the current row of the tx_desc buffer into curr_tx_desc to display on the screen */
 static void copy_tx_desc(void) {
 	memmove(curr_tx_desc, tx_desc[curr_scr_ix], CURR_TX_DESC_LEN);
@@ -641,7 +641,7 @@ static void copy_tx_desc(void) {
 }
 #endif
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** processes the Up button */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 	UNUSED(e);
@@ -873,7 +873,7 @@ static const bagl_element_t *io_seproxyhal_touch_deny(const bagl_element_t *e) {
 	return 0;                     // do not redraw the widget
 }
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** show the public key screen */
 void ui_public_key_1(void) {
 	uiState = UI_PUBLIC_KEY_1;
@@ -900,7 +900,7 @@ void ui_idle(void) {
 
 #if defined(TARGET_NANOS)
 	UX_DISPLAY(bagl_ui_idle_nanos, NULL);
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 	// reserve a display stack slot if none yet
 	if(G_ux.stack_count == 0) {
 		ux_stack_push();
@@ -909,7 +909,7 @@ void ui_idle(void) {
 #endif // #if TARGET_ID
 }
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** show the transaction description screen. */
 static void ui_display_tx_desc_1(void) {
 	uiState = UI_TX_DESC_1;
@@ -942,7 +942,7 @@ void ui_top_sign(void) {
 
 #if defined(TARGET_NANOS)
 	UX_DISPLAY(bagl_ui_top_sign_nanos, NULL);
-#elif defined(TARGET_NANOX)
+#elif defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 	// reserve a display stack slot if none yet
 	if(G_ux.stack_count == 0) {
 		ux_stack_push();
@@ -951,7 +951,7 @@ void ui_top_sign(void) {
 #endif // #if TARGET_ID
 }
 
-#ifndef TARGET_NANOX
+#if !defined(TARGET_NANOX) && !defined(TARGET_NANOS2)
 /** show the "deny" screen */
 static void ui_deny(void) {
 	uiState = UI_DENY;
