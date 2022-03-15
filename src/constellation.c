@@ -21,6 +21,12 @@ static const char TXT_NUM_PARENTS[] = "NUM PARENTS\0";
 
 // static const char TXT_PARENT[] = "PARENT\0";
 
+static const char FROM_ADDRESS[] = "From Address\0";
+
+static const char TO_ADDRESS[] = "To Address\0";
+
+static const char ELLIPSES[] = "...\0";
+
 static const char TXT_LAST_TX_REF_1[] = "LAST TX REF (1/2)\0";
 
 static const char TXT_LAST_TX_REF_2[] = "LAST TX REF (2/2)\0";
@@ -54,7 +60,10 @@ static const unsigned char PUBLIC_KEY_PREFIX[] = {
 
 
 /** converts a value to base10 with a decimal point at DECIMAL_PLACE_OFFSET, which should be 100,000,000 or 100 million, thus the suffix 100m */
-static void to_base10_100m(const unsigned char * value, const unsigned int value_len, char * dest, const unsigned int dest_len) {
+static void to_base10_100m(const unsigned char * value,
+                           const unsigned int value_len,
+                           char * dest,
+                           __attribute__((unused)) const unsigned int dest_len) {
 
 	// encode in base10
 	char base10_buffer[MAX_TX_TEXT_WIDTH];
@@ -63,11 +72,11 @@ static void to_base10_100m(const unsigned char * value, const unsigned int value
 	// place the decimal place.
 	unsigned int dec_place_ix = buffer_len - DECIMAL_PLACE_OFFSET;
 	if (buffer_len < DECIMAL_PLACE_OFFSET) {
-		os_memmove(dest, TXT_LOW_VALUE, sizeof(TXT_LOW_VALUE));
+		memmove(dest, TXT_LOW_VALUE, sizeof(TXT_LOW_VALUE));
 	} else {
-		os_memmove(dest + dec_place_ix, TXT_PERIOD, sizeof(TXT_PERIOD));
-		os_memmove(dest, base10_buffer, dec_place_ix);
-		os_memmove(dest + dec_place_ix + 1, base10_buffer + dec_place_ix, buffer_len - dec_place_ix);
+		memcpy(dest + dec_place_ix, TXT_PERIOD, sizeof(TXT_PERIOD));
+		memcpy(dest, base10_buffer, dec_place_ix);
+		memmove(dest + dec_place_ix + 1, base10_buffer + dec_place_ix, buffer_len - dec_place_ix);
 	}
 }
 
@@ -223,9 +232,22 @@ void display_tx_desc() {
 
 		if (scr_ix < MAX_TX_TEXT_SCREENS) {
 			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-			memmove(tx_desc[scr_ix][0], buffer_0, MAX_TX_TEXT_WIDTH-1);
-			memmove(tx_desc[scr_ix][1], buffer_1, MAX_TX_TEXT_WIDTH-1);
-			memmove(tx_desc[scr_ix][2], buffer_2, MAX_TX_TEXT_WIDTH-1);
+
+			auto const char * header = (parent_ix == 0) ? FROM_ADDRESS : TO_ADDRESS;
+			char shortAddress[20] = "";
+			char subBuffStart[5];
+			char subBuffEnd[5];
+
+			memcpy(subBuffStart, &buffer_0[0], sizeof(subBuffStart));
+			memcpy(subBuffEnd, &buffer_2[strlen(buffer_2) - 5], sizeof(subBuffEnd));
+
+			strncat(shortAddress, &subBuffStart[0], sizeof(subBuffStart));
+			strncat(shortAddress, &ELLIPSES[0], sizeof(ELLIPSES));
+			strncat(shortAddress, &subBuffEnd[0], sizeof(subBuffEnd));
+
+			memmove(tx_desc[scr_ix][0], header, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][1], shortAddress, MAX_TX_TEXT_WIDTH-1);
+			memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 
 			scr_ix++;
 		}
