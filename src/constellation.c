@@ -196,21 +196,8 @@ static void remove_leading_zeros(unsigned int scr_ix, unsigned int line_ix) {
 void display_tx_desc() {
 	unsigned int scr_ix = 0;
 
-	// read number of parents
+	// Read the To and From address
 	unsigned char num_parents = next_raw_tx();
-
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		char hex_buffer[MAX_TX_TEXT_WIDTH];
-		unsigned int hex_buffer_len = 0;
-		hex_buffer_len = min(MAX_HEX_BUFFER_LEN, sizeof(num_parents) * 2);
-		to_hex(hex_buffer, (unsigned char *) &num_parents, hex_buffer_len);
-
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_NUM_PARENTS, sizeof(TXT_NUM_PARENTS));
-		memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len);
-		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-		scr_ix++;
-	}
 
 	for(int parent_ix = 0; parent_ix < num_parents; parent_ix++ ) {
 		memset(buffer, 0x00, sizeof(buffer));
@@ -219,7 +206,6 @@ void display_tx_desc() {
 			THROW(0x6D04);
 		}
 
-		// read the parent.
 		memset(buffer, 0x00, sizeof(buffer));
 		next_raw_tx_arr(buffer,buffer_len);
 
@@ -249,16 +235,15 @@ void display_tx_desc() {
 			scr_ix++;
 		}
 	}
-	int buffer_len = next_raw_tx();
 
+	// Read the Amount
+	int buffer_len = next_raw_tx();
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
-	// read the parent.
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
 
-	// display the value
 	if (scr_ix < MAX_TX_TEXT_SCREENS) {
 		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 		memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
@@ -266,64 +251,27 @@ void display_tx_desc() {
 		to_base10_100m(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1);
 		remove_leading_zeros(scr_ix,1);
 
-		// encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
 		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
 		scr_ix++;
 	}
 
-	// read the last tx ref
+	// Skip last the tx ref
 	buffer_len = next_raw_tx();
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		unsigned char * buffer_0 = buffer;
-		unsigned char * buffer_1 = buffer_0 + (MAX_TX_TEXT_WIDTH-1);
-		unsigned char * buffer_2 = buffer_1 + (MAX_TX_TEXT_WIDTH-1);
-		unsigned char * buffer_3 = buffer_2 + (MAX_TX_TEXT_WIDTH-1);
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_1, sizeof(TXT_LAST_TX_REF_1));
-		if(buffer_len == 0) {
-			memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
-			memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-		} else {
-			memmove(tx_desc[scr_ix][1], buffer_0, MAX_TX_TEXT_WIDTH-1);
-			memmove(tx_desc[scr_ix][2], buffer_1, MAX_TX_TEXT_WIDTH-1);
-		}
-		scr_ix++;
-		if (scr_ix < MAX_TX_TEXT_SCREENS) {
-			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-			memmove(tx_desc[scr_ix][0], TXT_LAST_TX_REF_2, sizeof(TXT_LAST_TX_REF_2));
-			if(buffer_len == 0) {
-				memmove(tx_desc[scr_ix][1], NO_TX_REF, sizeof(NO_TX_REF));
-				memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-			} else {
-				memmove(tx_desc[scr_ix][1], buffer_2, MAX_TX_TEXT_WIDTH-1);
-				memmove(tx_desc[scr_ix][2], buffer_3, MAX_TX_TEXT_WIDTH-1);
-			}
-			scr_ix++;
-		}
-	}
 
-	// read the last tx ordinal
+	// Skip the last tx ordinal
 	buffer_len = next_raw_tx();
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_LAST_TX_ORDINAL, sizeof(TXT_LAST_TX_ORDINAL));
-		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
-		remove_leading_zeros(scr_ix,1);
-		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-		scr_ix++;
-	}
 
-	// read the fee
+	// Read the fee
 	buffer_len = next_raw_tx();
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
@@ -339,29 +287,13 @@ void display_tx_desc() {
 		scr_ix++;
 	}
 
-	// read the salt
-
+	// Skip the Salt
 	buffer_len = next_raw_tx();
 	if(buffer_len >= MAX_BUFFER_LENGTH) {
 		THROW(0x6D06);
 	}
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer,buffer_len);
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		char hex_buffer[MAX_TX_TEXT_WIDTH * 4];
-		unsigned int hex_buffer_len = 0;
-		hex_buffer_len = min(MAX_HEX_BUFFER_LEN * 4, buffer_len * 2);
-		to_hex(hex_buffer, (unsigned char *) &buffer, hex_buffer_len);
-
-		unsigned int hex_buffer_len_1 = max(0,min(MAX_TX_TEXT_WIDTH, hex_buffer_len));
-		unsigned int hex_buffer_len_2 = max(0,min(MAX_TX_TEXT_WIDTH, hex_buffer_len - MAX_TX_TEXT_WIDTH));
-
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_SALT, sizeof(TXT_SALT));
-		memmove(tx_desc[scr_ix][1], hex_buffer, hex_buffer_len_1);
-		memmove(tx_desc[scr_ix][2], hex_buffer + MAX_TX_TEXT_WIDTH, hex_buffer_len_2);
-		scr_ix++;
-	}
 
 	max_scr_ix = scr_ix;
 
