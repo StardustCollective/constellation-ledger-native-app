@@ -106,27 +106,24 @@ UX_STEP_NOCB(
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_2_step,
-    bnn,
+    bn,
     {
-        // number of parents.
         tx_desc[0][0],
         tx_desc[0][1],
-        tx_desc[0][2]
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_3_step,
-    bnnn,
+    bn,
     {
-        "From Address",
         tx_desc[1][0],
         tx_desc[1][1],
-        tx_desc[1][2]
+
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_4_step,
-    bnnn,
+    bn,
     {
-        "To Address",
+        // "Amount",
         tx_desc[2][0],
         tx_desc[2][1],
         tx_desc[2][2]
@@ -135,58 +132,13 @@ UX_STEP_NOCB(
     ux_confirm_single_flow_5_step,
     bnn,
     {
-        // "Amount",
+        // "Fee",
         tx_desc[3][0],
         tx_desc[3][1],
         tx_desc[3][2]
 	});
-UX_STEP_NOCB(
-    ux_confirm_single_flow_6_step,
-    bnn,
-    {
-        // "Last Ref 01",
-        tx_desc[4][0],
-        tx_desc[4][1],
-        tx_desc[4][2]
-	});
-UX_STEP_NOCB(
-    ux_confirm_single_flow_7_step,
-    bnn,
-    {
-        // "Last Ref 02",
-        tx_desc[5][0],
-        tx_desc[5][1],
-        tx_desc[5][2]
-	});
-UX_STEP_NOCB(
-    ux_confirm_single_flow_8_step,
-    bnn,
-    {
-        // "Ordinal",
-        tx_desc[6][0],
-        tx_desc[6][1],
-        tx_desc[6][2]
-	});
-UX_STEP_NOCB(
-    ux_confirm_single_flow_9_step,
-    bnn,
-    {
-        // "Fee",
-        tx_desc[7][0],
-        tx_desc[7][1],
-        tx_desc[7][2]
-	});
-UX_STEP_NOCB(
-    ux_confirm_single_flow_10_step,
-    bnn,
-    {
-        // "Salt",
-        tx_desc[8][0],
-        tx_desc[8][1],
-        tx_desc[8][2]
-	});
 UX_STEP_VALID(
-    ux_confirm_single_flow_11_step,
+    ux_confirm_single_flow_6_step,
     nn,
     io_seproxyhal_touch_approve(NULL),
     {
@@ -195,7 +147,7 @@ UX_STEP_VALID(
         "Transaction"
 	});
 UX_STEP_VALID(
-    ux_confirm_single_flow_12_step,
+    ux_confirm_single_flow_7_step,
     nn,
     io_seproxyhal_touch_deny(NULL),
     {
@@ -210,12 +162,7 @@ UX_FLOW(ux_confirm_single_flow,
         &ux_confirm_single_flow_4_step,
         &ux_confirm_single_flow_5_step,
         &ux_confirm_single_flow_6_step,
-        &ux_confirm_single_flow_7_step,
-        &ux_confirm_single_flow_8_step,
-        &ux_confirm_single_flow_9_step,
-        &ux_confirm_single_flow_10_step,
-        &ux_confirm_single_flow_11_step,
-        &ux_confirm_single_flow_12_step
+        &ux_confirm_single_flow_7_step
         );
 
 UX_STEP_NOCB(
