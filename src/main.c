@@ -76,6 +76,11 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 /** instruction to send back the public key. */
 #define INS_GET_PUBLIC_KEY 0x04
 
+/** instruction to blind sign a message and send back the signature. */
+#define INS_BLIND_SIGN 0x06
+
+
+
 /** #### instructions end #### */
 
 /** some kind of event loop */
@@ -222,14 +227,15 @@ static void constellation_main(void) {
 
 					/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
 					unsigned char * bip44_in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
-
 					unsigned int bip44_path[BIP44_PATH_LEN];
+					
 					uint32_t i;
 					for (i = 0; i < BIP44_PATH_LEN; i++) {
 						bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 						bip44_in += 4;
 					}
 					unsigned char privateKeyData[32];
+
 					os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
 					cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
 
@@ -255,6 +261,27 @@ static void constellation_main(void) {
 				}
 				break;
 
+				case INS_BLIND_SIGN: {
+					Timer_Restart();
+					
+					if(!blind_signing_enabled_bool){
+						ui_blind_singing_must_enable_message();
+						THROW(0x6986);
+						break;
+					}
+
+					if (G_io_apdu_buffer[2] == P1_LAST) {
+						ui_top_blind_signing();
+					}
+
+					flags |= IO_ASYNCH_REPLY;
+
+					if (G_io_apdu_buffer[2] == P1_MORE) {
+						io_seproxyhal_touch_approve2(NULL);
+					}
+						
+				}
+				break;
 				case 0xFF:                                                                                                                                 // return to dashboard
 					goto return_to_dashboard;
 
