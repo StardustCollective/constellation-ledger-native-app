@@ -90,28 +90,22 @@ static const unsigned char KRYO_PREFIX[] = {0x03,0x01};
 /** UI was touched indicating the user wants to deny te signature request */
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
 
-/** UI was touched indicating the user wants to go to the idle screen */
-static const bagl_element_t * io_seproxyhal_touch_to_idle(const bagl_element_t *e);
-
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
-/** UI was touched indicating the user wants to exit the app */
-static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
-
 /** UI was touched indicating the user wants to enable blind signing */
 static const bagl_element_t * io_seproxyhal_touch_enable_blind_signing(const bagl_element_t *e);
 
 /** UI was touched indicating the user wants to disable blind signing */
 static const bagl_element_t * io_seproxyhal_touch_disable_blind_signing(const bagl_element_t *e);
 
+/** Show the UI for the blind signing settings */
+void ui_blind_signing_settings(void);
+
+#if defined(TARGET_NANOS)
+
+/** UI was touched indicating the user wants to exit the app */
+static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
+
 /** display part of the transaction description */
 static void ui_display_tx_desc_1(void);
-static void ui_display_tx_desc_2(void);
-
-/** display the UI for signing a transaction */
-static void ui_sign(void);
-
-/** display the UI for denying a transaction */
-static void ui_deny(void);
 
 /** display the UI for idle settings */
 void ui_idle_settings(void);
@@ -125,17 +119,34 @@ void ui_blind_signing_accept(void);
 /** show the UI for signing a message */
 void ui_blind_signing_reject(void);
 
-/** Show the UI for the blind signing settings */
-void ui_blind_signing_settings(void);
-
 /** Show the UI for the blind signing settings go back */
 void ui_blind_settings_go_back(void);
+
+/** display the UI for signing a transaction */
+static void ui_sign(void);
+
+/** display the UI for denying a transaction */
+static void ui_deny(void);
 
 /** move up in the transaction description list */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e);
 
 /** move down in the transaction description list */
 static const bagl_element_t * tx_desc_dn(const bagl_element_t *e);
+
+/** UI was touched indicating the user wants to exit the app */
+static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
+
+/** display part of the transaction description */
+static void ui_display_tx_desc_1(void);
+
+#endif
+
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+
+/** UI was touched indicating the user wants to go to the idle screen */
+static const bagl_element_t * io_seproxyhal_touch_to_idle(const bagl_element_t *e);
+
 #endif
 
 /** sets the tx_desc variables to no information */
@@ -146,6 +157,7 @@ int getIntLength(int n);
 
 /** Converts an in to Ascii Byte array */
 void intToBytes(char *buf, int n);
+
 
 ////////////////////////////////////  NANO X //////////////////////////////////////////////////
 #if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
@@ -189,7 +201,7 @@ UX_STEP_VALID(
     bb,
     io_seproxyhal_touch_to_idle(NULL),
     {	
-		"Back"
+		"Back",
         "",
 	});
 
@@ -214,7 +226,7 @@ UX_STEP_VALID(
     bb,
     io_seproxyhal_touch_to_idle(NULL),
     {	
-		"Back"
+		"Back",
         "",
 	});
 
@@ -300,7 +312,6 @@ UX_STEP_NOCB(
         // "Amount",
         tx_desc[2][0],
         tx_desc[2][1],
-        tx_desc[2][2]
 	});
 UX_STEP_NOCB(
     ux_confirm_single_flow_5_step,
@@ -431,7 +442,7 @@ UX_FLOW(ux_idle_flow,
 //  Nano S - UI Idle
 ///////////////////////////////////////
 
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#if defined(TARGET_NANOS)
 
 /** UI struct for the idle screen */
 static const bagl_element_t bagl_ui_idle_nanos[] = {
@@ -776,25 +787,6 @@ static const bagl_element_t bagl_ui_tx_desc_nanos_1[] = {
 /* */
 };
 
-/** UI struct for the transaction description screen, Nano S. */
-static const bagl_element_t bagl_ui_tx_desc_nanos_2[] = {
-// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
-// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
-// },
-	{       {       BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL},
-	/* screen 2 number */
-	{       {       BAGL_LABELINE, 0x02, 0, 10, 20, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, "2/2"},
-	/* second line of description of current screen */
-	{       {       BAGL_LABELINE, 0x02, 10, 15, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[1]},
-	/* third line of description of current screen  */
-	{       {       BAGL_LABELINE, 0x02, 10, 26, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, curr_tx_desc[2]},
-	/* left icon is up arrow  */
-	{       {       BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL},
-	/* right icon is down arrow */
-	{       {       BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL},
-/* */
-};
-
 /**
  * buttons for the transaction description screen
  *
@@ -814,27 +806,6 @@ static unsigned int bagl_ui_tx_desc_nanos_1_button(unsigned int button_mask, uns
 	}
 	return 0;
 }
-
-/**
- * buttons for the transaction description screen
- *
- * up on Left button, down on right button.
- */
-static unsigned int bagl_ui_tx_desc_nanos_2_button(unsigned int button_mask, unsigned int button_mask_counter) {
-	UNUSED(button_mask_counter);
-
-	switch (button_mask) {
-	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
-		tx_desc_dn(NULL);
-		break;
-
-	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
-		tx_desc_up(NULL);
-		break;
-	}
-	return 0;
-}
-
 
 ///////////////////////////////////////
 //  Nano S - Sign Message UI
@@ -1039,9 +1010,6 @@ static unsigned int bagl_ui_blind_singing_must_enable_message_nanos_button(unsig
 	return 0;
 }
 
-#endif
-
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 /** if the user wants to exit go back to the app dashboard. */
 static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
 	UNUSED(e);
@@ -1049,9 +1017,7 @@ static const bagl_element_t *io_seproxyhal_touch_exit(const bagl_element_t *e) {
 	os_sched_exit(0);
 	return NULL;                     // do not redraw the widget
 }
-#endif
 
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 /** copy the current row of the tx_desc buffer into curr_tx_desc to display on the screen */
 static void copy_tx_desc(void) {
 	memmove(curr_tx_desc, tx_desc[curr_scr_ix], CURR_TX_DESC_LEN);
@@ -1059,9 +1025,7 @@ static void copy_tx_desc(void) {
 	curr_tx_desc[1][MAX_TX_TEXT_WIDTH - 1] = '\0';
 	curr_tx_desc[2][MAX_TX_TEXT_WIDTH - 1] = '\0';
 }
-#endif
 
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
 /** processes the Up button */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 	UNUSED(e);
@@ -1396,6 +1360,8 @@ static const bagl_element_t *io_seproxyhal_touch_deny(const bagl_element_t *e) {
 	return 0;                     // do not redraw the widget
 }
 
+#if defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+
 static const bagl_element_t * io_seproxyhal_touch_to_idle(const bagl_element_t *e) {
 	
 	UNUSED(e);
@@ -1404,6 +1370,8 @@ static const bagl_element_t * io_seproxyhal_touch_to_idle(const bagl_element_t *
 	ui_idle();
 	return 0;                 // do not redraw the widget
 }
+
+#endif
 
 static const bagl_element_t * io_seproxyhal_touch_enable_blind_signing(const bagl_element_t *e) {
 	
@@ -1455,7 +1423,7 @@ void ui_idle_settings(void){
 // Transaction Signing
 ///////////////////////////////////////
 
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#if defined(TARGET_NANOS)
 /** show the transaction description screen. */
 static void ui_display_tx_desc_1(void) {
 	uiState = UI_TX_DESC_1;
@@ -1488,7 +1456,7 @@ void ui_top_sign(void) {
 #endif // #if TARGET_ID
 }
 
-#ifndef defined(TARGET_NANOX) || defined(TARGET_NANOS2)
+#if defined(TARGET_NANOS)
 /** show the "deny" screen */
 static void ui_deny(void) {
 	uiState = UI_DENY;
@@ -1517,6 +1485,7 @@ void ui_top_blind_signing(void) {
 #endif // #if TARGET_ID
 }
 
+#if defined(TARGET_NANOS)
 void ui_blind_signing_warning(void){
 	uiState = UI_BLIND_SIGNING_WARNING;
 	#if defined(TARGET_NANOS)
@@ -1537,6 +1506,7 @@ void ui_blind_signing_reject(void){
 		UX_DISPLAY(bagl_ui_blind_signing_reject_message_nanos, NULL);
 	#endif // #if TARGET_ID
 }
+#endif
 
 ///////////////////////////////////////
 // Blind Signing Settings

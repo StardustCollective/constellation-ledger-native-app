@@ -17,8 +17,6 @@ unsigned char buffer[MAX_BUFFER_LENGTH];
 /** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
 static const char TXT_BLANK[] = "\0";
 
-static const char TXT_NUM_PARENTS[] = "NUM PARENTS\0";
-
 // static const char TXT_PARENT[] = "PARENT\0";
 
 static const char FROM_ADDRESS[] = "From Address\0";
@@ -27,15 +25,7 @@ static const char TO_ADDRESS[] = "To Address\0";
 
 static const char ELLIPSES[] = "...\0";
 
-static const char TXT_LAST_TX_REF_1[] = "LAST TX REF (1/2)\0";
-
-static const char TXT_LAST_TX_REF_2[] = "LAST TX REF (2/2)\0";
-
-static const char TXT_LAST_TX_ORDINAL[] = "LAST TX ORDINAL\0";
-
 static const char TXT_FEE[] = "FEE\0";
-
-static const char TXT_SALT[] = "SALT\0";
 
 static const char TXT_ASSET_DAG[] = "$DAG\0";
 
@@ -48,9 +38,6 @@ static const char TXT_PERIOD[] = ".";
 /** Label when a public key has not been set yet */
 static const char NO_PUBLIC_KEY_0[] = "No Public Key\0";
 static const char NO_PUBLIC_KEY_1[] = "Requested Yet\0";
-
-static const char NO_TX_REF[] = "(No Tx Ref)\0";
-
 
 static const char ADDRESS_PREFIX[] = "DAG\0";
 
@@ -153,24 +140,6 @@ static void next_raw_tx_arr(unsigned char * arr, unsigned int length) {
 	}
 }
 
-/** returns the minimum of two ints. */
-static unsigned int min(unsigned int i0, unsigned int i1) {
-	if (i0 < i1) {
-		return i0;
-	} else {
-		return i1;
-	}
-}
-
-/** returns the maximum of two ints. */
-static unsigned int max(unsigned int i0, unsigned int i1) {
-	if (i0 < i1) {
-		return i1;
-	} else {
-		return i0;
-	}
-}
-
 static void remove_leading_zeros(unsigned int scr_ix, unsigned int line_ix) {
 	unsigned char found_nonzero = 0;
 	unsigned int nonzero_ix = 0;
@@ -222,7 +191,7 @@ void display_tx_desc() {
             char subBuffEnd[5];
 
             memcpy(subBuffStart, &buffer_0[0], sizeof(subBuffStart));
-            memcpy(subBuffEnd, &buffer_2[strlen(buffer_2) - 5], sizeof(subBuffEnd));
+            memcpy(subBuffEnd, &buffer_2[strlen((const char *)buffer_2) - 5], sizeof(subBuffEnd));
 
             strncat(shortAddress, &subBuffStart[0], sizeof(subBuffStart));
             strncat(shortAddress, &ELLIPSES[0], sizeof(ELLIPSES));
