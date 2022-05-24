@@ -266,7 +266,6 @@ static void constellation_main(void) {
 					
 					if(!blind_signing_enabled_bool){
 						ui_blind_singing_must_enable_message();
-						THROW(0x6986);
 						break;
 					}
 
