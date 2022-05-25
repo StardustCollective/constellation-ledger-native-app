@@ -47,6 +47,7 @@ static const unsigned char PUBLIC_KEY_PREFIX[] = {
 
 
 /** converts a value to base10 with a decimal point at DECIMAL_PLACE_OFFSET, which should be 100,000,000 or 100 million, thus the suffix 100m */
+
 static void to_base10_100m(const unsigned char * value, const unsigned int value_len, char * dest, __attribute__((unused)) const unsigned int dest_len) {
 
 	// encode in base10
@@ -187,19 +188,21 @@ void display_tx_desc() {
 
 			auto const char * header = (parent_ix == 0) ? FROM_ADDRESS : TO_ADDRESS;
 			char shortAddress[20] = "";
-            char subBuffStart[5];
-            char subBuffEnd[5];
 
-            memcpy(subBuffStart, &buffer_0[0], sizeof(subBuffStart));
-            memcpy(subBuffEnd, &buffer_2[strlen((const char *)buffer_2) - 5], sizeof(subBuffEnd));
+      char subBuffStart[5];
+      char subBuffEnd[5];
 
-            strncat(shortAddress, &subBuffStart[0], sizeof(subBuffStart));
-            strncat(shortAddress, &ELLIPSES[0], sizeof(ELLIPSES));
-            strncat(shortAddress, &subBuffEnd[0], sizeof(subBuffEnd));
+      memcpy(subBuffStart, &buffer_0[0], sizeof(subBuffStart));
+      memcpy(subBuffEnd, &buffer_2[strlen((const char *)buffer_2) - 5], sizeof(subBuffEnd));
+
+      strncat(shortAddress, &subBuffStart[0], sizeof(subBuffStart));
+      strncat(shortAddress, &ELLIPSES[0], sizeof(ELLIPSES));
+      strncat(shortAddress, &subBuffEnd[0], sizeof(subBuffEnd));
             
-            memmove(tx_desc[scr_ix][0], header, MAX_TX_TEXT_WIDTH-1);
-            memmove(tx_desc[scr_ix][1], shortAddress, MAX_TX_TEXT_WIDTH-1);
-            memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+      memmove(tx_desc[scr_ix][0], header, MAX_TX_TEXT_WIDTH-1);
+      memmove(tx_desc[scr_ix][1], shortAddress, MAX_TX_TEXT_WIDTH-1);
+      memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+
 
 			scr_ix++;
 		}
@@ -387,6 +390,4 @@ void calc_hash(void) {
 	// *** decoding salt
 	unsigned int saltLen = raw_tx[ix++];
 	add_base16_and_len_to_hash(raw_tx + ix, saltLen);
-	ix += saltLen;
-
 }

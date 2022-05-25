@@ -442,6 +442,7 @@ UX_FLOW(ux_idle_flow,
 //  Nano S - UI Idle
 ///////////////////////////////////////
 
+
 #if defined(TARGET_NANOS)
 
 /** UI struct for the idle screen */
@@ -1025,6 +1026,7 @@ static void copy_tx_desc(void) {
 	curr_tx_desc[1][MAX_TX_TEXT_WIDTH - 1] = '\0';
 	curr_tx_desc[2][MAX_TX_TEXT_WIDTH - 1] = '\0';
 }
+
 
 /** processes the Up button */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {

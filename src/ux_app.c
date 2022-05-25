@@ -9,6 +9,7 @@
 #include "ux.h"
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
-#else // TARGET_NANOX
+#else // TARGET_NANOX || TARGET_NANOS2
 ux_state_t ux;
 #endif // TARGET_NANOS
+
