@@ -23,6 +23,8 @@
 #include "constellation.h"
 #include "bagl.h"
 #include "base-encoding.h"
+#include "shared.h"
+#include "selector.h"
 // #include "btchip_base58.h"
 
 #define DEBUG_OUT_ENABLED false
@@ -196,6 +198,7 @@ static void constellation_main(void) {
 
 						// parse the transaction into human readable text.
 						display_tx_desc();
+						
 						// parse the transaction into machine readable hash.
 						calc_hash();
 
