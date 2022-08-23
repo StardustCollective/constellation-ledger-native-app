@@ -41,7 +41,7 @@ static void next_raw_tx_arr(unsigned char * arr, unsigned int length) {
 
 /** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
 /** only parse out the send-to address and amount from the txos, skip the rest.  */
-void display_tx_desc()
+void select_display_fields()
 {
 	unsigned int scr_ix = 0;
 
@@ -84,6 +84,7 @@ void display_tx_desc()
 
 	// Read the Amount
 	int buffer_len = next_raw_tx();
+	char amount_length_char = buffer_len + '0';
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer, buffer_len);
 
@@ -91,7 +92,7 @@ void display_tx_desc()
 
 	memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
 	memmove(tx_desc[scr_ix][1], buffer, buffer_len);
-	memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+	memset(tx_desc[scr_ix][2], amount_length_char, sizeof(amount_length_char));
 
 	scr_ix++;
 
@@ -107,13 +108,14 @@ void display_tx_desc()
 
 	// Read the fee
 	buffer_len = next_raw_tx();
+	char fee_length_char = buffer_len + '0';
 	memset(buffer, 0x00, sizeof(buffer));
 	next_raw_tx_arr(buffer, buffer_len);
 
 	memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
 	memmove(tx_desc[scr_ix][0], TXT_FEE, sizeof(TXT_FEE));
 	memmove(tx_desc[scr_ix][1], buffer, buffer_len);
-	memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
+	memset(tx_desc[scr_ix][2], fee_length_char, sizeof(fee_length_char));
 	scr_ix++;
 
 	// Skip the Salt

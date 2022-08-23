@@ -42,7 +42,7 @@ extern unsigned int raw_tx_len;
 extern unsigned int max_scr_ix;
 
 /** all text descriptions. */
-extern unsigned char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+extern char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 
 #endif
