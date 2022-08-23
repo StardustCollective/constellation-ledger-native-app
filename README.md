@@ -57,7 +57,7 @@ builds/app_s.elf  // Nano S
 builds/app_sp.elf // Nano S Plus
 builds/app_x.elf  // Nano X Plus
 ```
-3. Navigate to the `tests/functional` and run `npm i` to install node modules.
+3. Exit the build container and in your local environment navigate to the `tests/functional` and run `npm i` to install node modules.
 
 4. Run `npm test`
 
