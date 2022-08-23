@@ -52,7 +52,7 @@ static void selector_test(void **state) {
 
     memset(tx_desc, 0x00, sizeof(tx_desc));
 
-    display_tx_desc();
+    select_display_fields();
 
     // From Address
     assert_string_equal(tx_desc[0][1], "DAG7u...698a1");
@@ -62,9 +62,9 @@ static void selector_test(void **state) {
 
     // Amount
     assert_true(tx_desc[2][1][0] == 0x12);
-    assert_true(tx_desc[2][1][1] == 0xb7);
+    assert_true(tx_desc[2][1][1] == 0xffffffb7);
     assert_true(tx_desc[2][1][2] == 0x42);
-    assert_true(tx_desc[2][1][3] == 0x80);
+    assert_true(tx_desc[2][1][3] == 0xffffff80);
 
     // Fee
     assert_true(tx_desc[3][1][0] == 0);
