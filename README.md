@@ -62,10 +62,9 @@ You can now exit the build container. Your builds should be available locally in
 
 ### Functional Tests
 
-```
 1. Exit the build container and in your local environment navigate to the `tests/functional` and run `npm i` to install node modules.
 
-2. Run `npm test`
+2. Run `npm test`.
 
 ### Unit Tests
 
