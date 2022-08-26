@@ -3,37 +3,10 @@
  */
 #include "constellation.h"
 #include "base-encoding.h"
-
-/** the position of the decimal point, 8 characters in from the right side */
-#define DECIMAL_PLACE_OFFSET 8
+#include "shared.h"
 
 /** length of the checksum used to convert a tx.output.script_hash into an Address. */
 #define SCRIPT_HASH_CHECKSUM_LEN 4
-
-#define MAX_BUFFER_LENGTH 128
-
-unsigned char buffer[MAX_BUFFER_LENGTH];
-
-/** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
-static const char TXT_BLANK[] = "\0";
-
-// static const char TXT_PARENT[] = "PARENT\0";
-
-static const char FROM_ADDRESS[] = "From Address\0";
-
-static const char TO_ADDRESS[] = "To Address\0";
-
-static const char ELLIPSES[] = "...\0";
-
-static const char TXT_FEE[] = "FEE\0";
-
-static const char TXT_ASSET_DAG[] = "$DAG\0";
-
-/** text to display if an asset's base-10 encoded value is too low to display */
-static const char TXT_LOW_VALUE[] = "Low Value\0";
-
-/** a period, for displaying the decimal point. */
-static const char TXT_PERIOD[] = ".";
 
 /** Label when a public key has not been set yet */
 static const char NO_PUBLIC_KEY_0[] = "No Public Key\0";
@@ -44,26 +17,6 @@ static const char ADDRESS_PREFIX[] = "DAG\0";
 static const unsigned char PUBLIC_KEY_PREFIX[] = {
 	0x30,0x56,0x30,0x10,0x06,0x07,0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x05,0x2b,0x81,0x04,0x00,0x0a,0x03,0x42,0x00
 };
-
-
-/** converts a value to base10 with a decimal point at DECIMAL_PLACE_OFFSET, which should be 100,000,000 or 100 million, thus the suffix 100m */
-
-static void to_base10_100m(const unsigned char * value, const unsigned int value_len, char * dest, __attribute__((unused)) const unsigned int dest_len) {
-
-	// encode in base10
-	char base10_buffer[MAX_TX_TEXT_WIDTH];
-	unsigned int buffer_len = encode_base_10(value, value_len, base10_buffer, MAX_TX_TEXT_WIDTH-1, false);
-
-	// place the decimal place.
-	unsigned int dec_place_ix = buffer_len - DECIMAL_PLACE_OFFSET;
-	if (buffer_len < DECIMAL_PLACE_OFFSET) {
-		memmove(dest, TXT_LOW_VALUE, sizeof(TXT_LOW_VALUE));
-	} else {
-		memcpy(dest + dec_place_ix, TXT_PERIOD, sizeof(TXT_PERIOD));
-		memcpy(dest, base10_buffer, dec_place_ix);
-		memmove(dest + dec_place_ix + 1, base10_buffer + dec_place_ix, buffer_len - dec_place_ix);
-	}
-}
 
 void display_no_public_key() {
 	memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
@@ -119,163 +72,6 @@ void display_public_key(const unsigned char * public_key) {
 	memmove(current_public_key[1], address_1, address_len_1);
 	memmove(current_public_key[2], address_2, address_len_2);
 	publicKeyNeedsRefresh = 0;
-}
-
-/** returns the next byte in raw_tx and increments raw_tx_ix. If this would increment raw_tx_ix over the end of the buffer, throw an error. */
-static unsigned char next_raw_tx() {
-	if (raw_tx_ix < raw_tx_len) {
-		unsigned char retval = raw_tx[raw_tx_ix];
-		raw_tx_ix += 1;
-		return retval;
-	} else {
-		hashTainted = 1;
-		THROW(0x6D05);
-		// return 0;
-	}
-}
-
-/** fills the array in arr with the given number of bytes from raw_tx. */
-static void next_raw_tx_arr(unsigned char * arr, unsigned int length) {
-	for (unsigned int ix = 0; ix < length; ix++) {
-		*(arr + ix) = next_raw_tx();
-	}
-}
-
-static void remove_leading_zeros(unsigned int scr_ix, unsigned int line_ix) {
-	unsigned char found_nonzero = 0;
-	unsigned int nonzero_ix = 0;
-	for(unsigned int zero_ix = 0; (zero_ix < MAX_TX_TEXT_WIDTH-1) && (found_nonzero == 0); zero_ix++) {
-		nonzero_ix = zero_ix;
-		if(tx_desc[scr_ix][line_ix][zero_ix] != '0') {
-			found_nonzero = 1;
-		}
-	}
-	if(nonzero_ix > 0) {
-		for(unsigned int ix = 0; ix < MAX_TX_TEXT_WIDTH; ix++) {
-			if(ix <=  MAX_TX_TEXT_WIDTH - nonzero_ix) {
-				tx_desc[scr_ix][line_ix][ix] = tx_desc[scr_ix][line_ix][ix + nonzero_ix];
-			} else {
-				tx_desc[scr_ix][line_ix][ix] = '\0';
-			}
-		}
-	}
-}
-
-/** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
-/** only parse out the send-to address and amount from the txos, skip the rest.  */
-void display_tx_desc() {
-	unsigned int scr_ix = 0;
-
-	// Read the To and From address
-	unsigned char num_parents = next_raw_tx();
-
-	for(int parent_ix = 0; parent_ix < num_parents; parent_ix++ ) {
-		memset(buffer, 0x00, sizeof(buffer));
-		int buffer_len = next_raw_tx();
-		if(buffer_len >= MAX_BUFFER_LENGTH) {
-			THROW(0x6D04);
-		}
-
-		memset(buffer, 0x00, sizeof(buffer));
-		next_raw_tx_arr(buffer,buffer_len);
-
-		unsigned char * buffer_0 = buffer;
-		unsigned char * buffer_1 = buffer_0 + MAX_TX_TEXT_WIDTH;
-		unsigned char * buffer_2 = buffer_1 + MAX_TX_TEXT_WIDTH;
-
-		if (scr_ix < MAX_TX_TEXT_SCREENS) {
-			memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-
-			auto const char * header = (parent_ix == 0) ? FROM_ADDRESS : TO_ADDRESS;
-			char shortAddress[20] = "";
-
-      char subBuffStart[5];
-      char subBuffEnd[5];
-
-      memcpy(subBuffStart, &buffer_0[0], sizeof(subBuffStart));
-      memcpy(subBuffEnd, &buffer_2[strlen((const char *)buffer_2) - 5], sizeof(subBuffEnd));
-
-      strncat(shortAddress, &subBuffStart[0], sizeof(subBuffStart));
-      strncat(shortAddress, &ELLIPSES[0], sizeof(ELLIPSES));
-      strncat(shortAddress, &subBuffEnd[0], sizeof(subBuffEnd));
-            
-      memmove(tx_desc[scr_ix][0], header, MAX_TX_TEXT_WIDTH-1);
-      memmove(tx_desc[scr_ix][1], shortAddress, MAX_TX_TEXT_WIDTH-1);
-      memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-
-
-			scr_ix++;
-		}
-	}
-
-	// Read the Amount
-	int buffer_len = next_raw_tx();
-	if(buffer_len >= MAX_BUFFER_LENGTH) {
-		THROW(0x6D06);
-	}
-	memset(buffer, 0x00, sizeof(buffer));
-	next_raw_tx_arr(buffer,buffer_len);
-
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_ASSET_DAG, sizeof(TXT_ASSET_DAG));
-
-		to_base10_100m(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1);
-		remove_leading_zeros(scr_ix,1);
-
-		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-		scr_ix++;
-	}
-
-	// Skip last the tx ref
-	buffer_len = next_raw_tx();
-	if(buffer_len >= MAX_BUFFER_LENGTH) {
-		THROW(0x6D06);
-	}
-	memset(buffer, 0x00, sizeof(buffer));
-	next_raw_tx_arr(buffer,buffer_len);
-
-	// Skip the last tx ordinal
-	buffer_len = next_raw_tx();
-	if(buffer_len >= MAX_BUFFER_LENGTH) {
-		THROW(0x6D06);
-	}
-	memset(buffer, 0x00, sizeof(buffer));
-	next_raw_tx_arr(buffer,buffer_len);
-
-	// Read the fee
-	buffer_len = next_raw_tx();
-	if(buffer_len >= MAX_BUFFER_LENGTH) {
-		THROW(0x6D06);
-	}
-	memset(buffer, 0x00, sizeof(buffer));
-	next_raw_tx_arr(buffer,buffer_len);
-	if (scr_ix < MAX_TX_TEXT_SCREENS) {
-		memset(tx_desc[scr_ix], '\0', CURR_TX_DESC_LEN);
-		memmove(tx_desc[scr_ix][0], TXT_FEE, sizeof(TXT_FEE));
-		encode_base_10(buffer, buffer_len, tx_desc[scr_ix][1], MAX_TX_TEXT_WIDTH-1, false);
-		remove_leading_zeros(scr_ix,1);
-		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-		scr_ix++;
-	}
-
-	// Skip the Salt
-	buffer_len = next_raw_tx();
-	if(buffer_len >= MAX_BUFFER_LENGTH) {
-		THROW(0x6D06);
-	}
-	memset(buffer, 0x00, sizeof(buffer));
-	next_raw_tx_arr(buffer,buffer_len);
-
-	max_scr_ix = scr_ix;
-
-	while(scr_ix < MAX_TX_TEXT_SCREENS) {
-		memmove(tx_desc[scr_ix][0], TXT_BLANK, sizeof(TXT_BLANK));
-		memmove(tx_desc[scr_ix][1], TXT_BLANK, sizeof(TXT_BLANK));
-		memmove(tx_desc[scr_ix][2], TXT_BLANK, sizeof(TXT_BLANK));
-
-		scr_ix++;
-	}
 }
 
 void add_hex_data_to_hash(unsigned char * in, const unsigned int len) {

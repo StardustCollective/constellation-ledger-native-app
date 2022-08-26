@@ -4,3 +4,6 @@ dep
 obj
 src/glyphs.c
 src/glyphs.h
+tests/functional/node_modules
+tests/functional/snapshots-tmp
+tests/unit/build

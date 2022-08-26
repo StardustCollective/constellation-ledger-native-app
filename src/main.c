@@ -23,7 +23,9 @@
 #include "constellation.h"
 #include "bagl.h"
 #include "base-encoding.h"
-// #include "btchip_base58.h"
+#include "shared.h"
+#include "selector.h"
+#include "format.h"
 
 #define DEBUG_OUT_ENABLED false
 
@@ -194,8 +196,12 @@ static void constellation_main(void) {
 						curr_scr_ix = 0;
 						memset(tx_desc, 0x00, sizeof(tx_desc));
 
-						// parse the transaction into human readable text.
-						display_tx_desc();
+						// select the transaction fields.
+						select_display_fields();
+
+						// Format the selected fields.
+						format_display_values();
+						
 						// parse the transaction into machine readable hash.
 						calc_hash();
 

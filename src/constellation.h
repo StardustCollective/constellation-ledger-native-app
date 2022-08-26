@@ -9,7 +9,6 @@
 #include "hex.h"
 #include "cx.h"
 #include <stdbool.h>
-#include "os_io_seproxyhal.h"
 #include "ui.h"
 
 /** length of the public key */
@@ -33,9 +32,6 @@
 extern unsigned char public_key_encoded[33];
 
 extern unsigned char address[ADDRESS_LEN];
-
-/** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
-void display_tx_desc(void);
 
 /** calculates the hash based on the tx */
 void calc_hash(void);

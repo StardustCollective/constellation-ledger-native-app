@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>
+#include "shared.h"
 
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
@@ -55,20 +56,11 @@ static const char BASE_16_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7',
 /** index of the current screen. */
 unsigned int curr_scr_ix;
 
-/** max index for all screens. */
-unsigned int max_scr_ix;
-
-/** raw transaction data. */
-unsigned char raw_tx[MAX_TX_RAW_LENGTH];
-
 /** current index into raw transaction. */
 unsigned int raw_tx_ix;
 
 /** current length of raw transaction. */
 unsigned int raw_tx_len;
-
-/** all text descriptions. */
-char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 /** currently displayed text description. */
 char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
