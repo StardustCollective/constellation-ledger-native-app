@@ -18,20 +18,6 @@
 /** text description font. */
 #define TX_DESC_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER
 
-/** message security prefix length */
-#define MESSAGE_PREFIX_LENGTH 31
-
-/** message security prefix */
-static const uint8_t message_prefix[MESSAGE_PREFIX_LENGTH] = { 0x19, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x65, 0x6c, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x20, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x3a, 0xa };
-
-/** message prefix delimeter length */
-#define MESSAGE_PREFIX_DELIMETER_LENGTH 1 
-
-/** message prefix delimeter */
-static const uint8_t message_prefix_delimeter[MESSAGE_PREFIX_DELIMETER_LENGTH] = { 0xa };
-
-/** Byte length of message size param */
-#define MESSAGE_SIZE_LEN 4
 
 /** Signature Length */ 
 #define SIGNATURE_LEN 256
@@ -1163,51 +1149,42 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {				
-		cx_ecfp_private_key_t privateKey;
-    	unsigned char privateKeyData[32];
-		unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
-		unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;
-		
-		// Get the message length.
-		memmove(message_length_bytes, message_without_apdu, MESSAGE_SIZE_LEN);
-	
-		int message_length = (message_length_bytes[0] << 24) + (message_length_bytes[1] << 16) + (message_length_bytes[2] << 8) + (message_length_bytes[3]);
-		int message_digits_length = getIntLength(message_length);
+		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
+		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
 
-		// Convert message length int to ascii values
-		char message_length_ascii_bytes[message_digits_length];
-		intToBytes(message_length_ascii_bytes, message_length);
-
-		// Get the message data.
-		unsigned char * messsage_with_bip44 = message_without_apdu + MESSAGE_SIZE_LEN;
-		uint8_t message_data[message_length];
-		memmove(message_data, messsage_with_bip44, message_length);
-
-		// Initial message buffer
-		uint8_t message[MESSAGE_PREFIX_LENGTH + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH + message_length];
-		
-		// Concat prefix, message length, delimeter and message
-		memcpy(message, message_prefix, MESSAGE_PREFIX_LENGTH);
-		memcpy(message + MESSAGE_PREFIX_LENGTH, message_length_ascii_bytes, message_digits_length);
-		memcpy(message + MESSAGE_PREFIX_LENGTH + message_digits_length, message_prefix_delimeter, MESSAGE_PREFIX_DELIMETER_LENGTH);
-		memcpy(message + MESSAGE_PREFIX_LENGTH + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH , message_data, message_length);
-
-		// Get the Bip44 Path
-		unsigned char * bip44_in = message_without_apdu + (message_length + MESSAGE_SIZE_LEN);
 		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
 		unsigned int bip44_path[BIP44_PATH_LEN];
-
 		uint32_t i;
 		for (i = 0; i < BIP44_PATH_LEN; i++) {
 			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 			bip44_in += 4;
 		}
 
+		cx_ecfp_private_key_t privateKey;
+    	unsigned char privateKeyData[32];
+
+		PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
+		for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
+			// PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
+			PRINTF("%02x%02x%02x%02x%02x%02x%02x%02x", 
+				raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
+				raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]);
+		}
+		PRINTF("\n");
+
+
 		// Hash the message
 		uint8_t hash512Digest[CX_SHA512_SIZE];
-		cx_hash_sha512(message, MESSAGE_PREFIX_LENGTH + message_length + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH, hash512Digest, CX_SHA512_SIZE);
+		cx_hash_sha512(raw_tx, raw_tx_ix, hash512Digest, CX_SHA512_SIZE);
 
-		// Retreive the private key
+		PRINTF("SHA512 : %d\n", CX_SHA512_SIZE);
+		for(int i = 0; i < CX_SHA512_SIZE; i += 8) {
+			PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
+				hash512Digest[i], hash512Digest[i+1], hash512Digest[i+2], hash512Digest[i+3],
+				hash512Digest[i+4], hash512Digest[i+5], hash512Digest[i+6], hash512Digest[i+7]);
+		}
+
+		// // Retreive the private key
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
     	memset(privateKeyData, 0, sizeof(privateKeyData));
