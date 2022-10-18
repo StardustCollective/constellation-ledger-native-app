@@ -176,12 +176,12 @@ static void refresh_public_key_display(void) {
 
 static int init_msg_sign_buf(void) {
 	raw_tx_ix = 0;
-	// raw_tx_len = 0;
-	raw_tx_len = MESSAGE_PREFIX_LENGTH;
+	raw_tx_len = 0;
+	// raw_tx_len = MESSAGE_PREFIX_LENGTH;
 
 	unsigned char * out = raw_tx + raw_tx_ix;
 	memcpy(out, message_prefix, MESSAGE_PREFIX_LENGTH);
-	raw_tx_ix += raw_tx_len;
+	raw_tx_ix += MESSAGE_PREFIX_LENGTH;
 
 	unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
 	unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;					
@@ -321,7 +321,9 @@ static void constellation_main(void) {
 					unsigned int bip44_path[BIP44_PATH_LEN];
 					
 					uint32_t i;
+					PRINTF("BIP44\n");
 					for (i = 0; i < BIP44_PATH_LEN; i++) {
+						PRINTF("%02x %02x %02x %02x\n",bip44_in[0],bip44_in[1],bip44_in[2],bip44_in[3]);
 						bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 						bip44_in += 4;
 					}
@@ -378,9 +380,11 @@ static void constellation_main(void) {
 						PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
 					}
 
+					unsigned int len = get_apdu_buffer_length() - 4; 				// skip message len
+					PRINTF("adpu pkt len: %d\n",len+4);
+
 					// move the contents of the buffer into raw_tx, 
 					// and update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
-					unsigned int len = get_apdu_buffer_length() - 4; 				// skip message len
 					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH + 4; // skip message len
 					unsigned char * out = raw_tx + raw_tx_ix;
 					if (raw_tx_ix + len > MAX_TX_RAW_LENGTH) {
@@ -389,6 +393,14 @@ static void constellation_main(void) {
 						THROW(0x6D08);
 					}
 
+					PRINTF("input ADPU without header\n");
+					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
+						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
+							in[i], in[i+1], in[i+2], in[i+3],
+							in[i+4], in[i+5], in[i+6], in[i+7]); 
+					}
+
+					PRINTF("raw tx header\n");
 					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
 						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
 							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
@@ -398,6 +410,7 @@ static void constellation_main(void) {
 					// convert message to b64 (dag4.keyStore does this)
 					size_t outputsize = Base64encode(out, in, msg_len);
 					PRINTF("output size %d\n", outputsize);
+					PRINTF("raw tx with b64 encoded message\n");
 					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
 						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
 							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
@@ -417,23 +430,12 @@ static void constellation_main(void) {
 
 					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
 					if (G_io_apdu_buffer[2] == P1_LAST) {
-						// raw_tx_len = raw_tx_ix;
+						raw_tx_len = raw_tx_ix;
 						// raw_tx_ix = 0;
 						// hash_data_ix = 0;
 						// curr_scr_ix = 0;
 						// memset(tx_desc, 0x00, sizeof(tx_desc));
 
-						// select the transaction fields.
-						// select_display_fields();
-
-						// Format the selected fields.
-						// format_display_values();
-						
-						// parse the transaction into machine readable hash.
-						// calc_hash();
-
-						// display the UI, starting at the top screen which is "Sign Tx Now".
-						// ui_top_sign();
 						ui_top_blind_signing();
 					}
 

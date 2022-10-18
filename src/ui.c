@@ -1149,20 +1149,6 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {				
-		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
-		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
-
-		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-		unsigned int bip44_path[BIP44_PATH_LEN];
-		uint32_t i;
-		for (i = 0; i < BIP44_PATH_LEN; i++) {
-			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
-			bip44_in += 4;
-		}
-
-		cx_ecfp_private_key_t privateKey;
-    	unsigned char privateKeyData[32];
-
 		PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
 		for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
 			// PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
@@ -1184,10 +1170,31 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 				hash512Digest[i+4], hash512Digest[i+5], hash512Digest[i+6], hash512Digest[i+7]);
 		}
 
-		// // Retreive the private key
+		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
+		unsigned char * bip44_in = G_io_apdu_buffer + 96 + 3 + 12;
+		unsigned int bip44_path[BIP44_PATH_LEN];
+
+		uint32_t i;
+		PRINTF("BIP44 again\n");
+		for (i = 0; i < BIP44_PATH_LEN; i++) {
+			PRINTF("%02x %02x %02x %02x\n",bip44_in[0],bip44_in[1],bip44_in[2],bip44_in[3]);
+			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
+			bip44_in += 4;
+		}
+
+		cx_ecfp_private_key_t privateKey;
+    	unsigned char privateKeyData[32];
+    	memset(privateKeyData, 0, sizeof(privateKeyData));
+
+		// Retreive the private key
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
-    	memset(privateKeyData, 0, sizeof(privateKeyData));
+		PRINTF("PRIVATE KEY DATA\n");
+		for(int i = 0; i < 32; i += 8) {
+			PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
+				privateKeyData[i], privateKeyData[i+1], privateKeyData[i+2], privateKeyData[i+3],
+				privateKeyData[i+4], privateKeyData[i+5], privateKeyData[i+6], privateKeyData[i+7]);
+		}
 
 		// Sign the message
     	unsigned char sig[SIGNATURE_LEN];
