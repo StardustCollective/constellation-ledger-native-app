@@ -48,6 +48,8 @@ static const uint8_t message_prefix_delimeter[MESSAGE_PREFIX_DELIMETER_LENGTH] =
 
 #define EXIT_TIMER_REFRESH_INTERVAL 512
 
+int msg_len = 0; // NOT static
+
 static void Timer_UpdateDescription() {
 	snprintf(timer_desc, MAX_TIMER_TEXT_WIDTH, "%d", exit_timer / EXIT_TIMER_REFRESH_INTERVAL);
 }
@@ -209,7 +211,6 @@ static void constellation_main(void) {
 	volatile unsigned int rx = 0;
 	volatile unsigned int tx = 0;
 	volatile unsigned int flags = 0;
-	int msg_len = 0;
 
 	// DESIGN NOTE: the bootloader ignores the way APDU are fetched. The only
 	// goal is to retrieve APDU.
@@ -408,7 +409,7 @@ static void constellation_main(void) {
 					}
 
 					// convert message to b64 (dag4.keyStore does this)
-					size_t outputsize = Base64encode(out, in, msg_len);
+					size_t outputsize = Base64encode(out, in, msg_len*3/4);
 					PRINTF("output size %d\n", outputsize);
 					PRINTF("raw tx with b64 encoded message\n");
 					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
