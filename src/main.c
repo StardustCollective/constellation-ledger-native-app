@@ -211,7 +211,6 @@ static void constellation_main(void) {
 	volatile unsigned int rx = 0;
 	volatile unsigned int tx = 0;
 	volatile unsigned int flags = 0;
-	int msg_len = 0;
 
 	// DESIGN NOTE: the bootloader ignores the way APDU are fetched. The only
 	// goal is to retrieve APDU.

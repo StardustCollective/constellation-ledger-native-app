@@ -1187,7 +1187,6 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
     	unsigned char privateKeyData[32];
     	memset(privateKeyData, 0, sizeof(privateKeyData));
 
-		// // Retreive the private key
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
 		PRINTF("PRIVATE KEY DATA\n");
