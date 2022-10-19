@@ -22,7 +22,7 @@ static const char TXT_BLANK[] = "\0";
  * So we can only display 9 screens of data, and can only sign transactions up to 1kb in size.
  * max size of a transaction, binary will not compile if we try to allow transactions over 1kb.
  */
-#define MAX_TX_RAW_LENGTH 256
+#define MAX_TX_RAW_LENGTH 512
 
 /** raw transaction data. */
 extern unsigned char raw_tx[MAX_TX_RAW_LENGTH];

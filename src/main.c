@@ -138,7 +138,6 @@ static void refresh_public_key_display(void) {
 static int init_msg_sign_buf(void) {
 	raw_tx_ix = 0;
 	raw_tx_len = 0;
-	// raw_tx_len = MESSAGE_PREFIX_LENGTH;
 
 	unsigned char * out = raw_tx + raw_tx_ix;
 	memcpy(out, message_prefix, MESSAGE_PREFIX_LENGTH);
@@ -281,9 +280,7 @@ static void constellation_main(void) {
 					unsigned int bip44_path[BIP44_PATH_LEN];
 					
 					uint32_t i;
-					PRINTF("BIP44\n");
 					for (i = 0; i < BIP44_PATH_LEN; i++) {
-						PRINTF("%02x %02x %02x %02x\n",bip44_in[0],bip44_in[1],bip44_in[2],bip44_in[3]);
 						bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 						bip44_in += 4;
 					}
@@ -324,16 +321,13 @@ static void constellation_main(void) {
 
 					// check the third byte (0x02) for the instruction subtype.
 					if ((G_io_apdu_buffer[2] != P1_MORE) && (G_io_apdu_buffer[2] != P1_LAST)) {
-						PRINTF("hash tainted 0x6a86\n");
 						hashTainted = 1;
 						THROW(0x6A86);
 					}
 
 					// if this is the first transaction part, 
-					// reset the hash and all the other temporary variables.
-					// append message prefix to fresh buffer, along with message lengh and delimeters
+					// append message prefix, message length and delimeters to fresh buffer, 
 					if (hashTainted) {
-						PRINTF("hash tainted - first txn\n");
 						hashTainted = 0;
 						msg_len = init_msg_sign_buf();
 						PRINTF("msg_len: %d\n", msg_len);
@@ -348,52 +342,32 @@ static void constellation_main(void) {
 					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH + 4; // skip message len
 					unsigned char * out = raw_tx + raw_tx_ix;
 					if (raw_tx_ix + len > MAX_TX_RAW_LENGTH) {
-						PRINTF("hash tainted 0x6d08\n");
 						hashTainted = 1;
 						THROW(0x6D08);
 					}
 
 					PRINTF("input ADPU without header\n");
-					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
-						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-							in[i], in[i+1], in[i+2], in[i+3],
-							in[i+4], in[i+5], in[i+6], in[i+7]); 
+					for(int i = 0; i < len; i += 1) {
+						if (i%8 == 0) PRINTF("\n");
+						PRINTF("%02x ", in[i]);
 					}
+					PRINTF("\n");
 
-					PRINTF("raw tx header\n");
-					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
-						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
-							raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]); 
-					}
+					memcpy(out, in, len);
+					raw_tx_ix += len;
 
-					memcpy(out, in, msg_len);
-					PRINTF("raw tx with encoded message\n");
-					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
-						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
-							raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]); 
-					}
-					raw_tx_ix += msg_len;
-
-					PRINTF("pkt len: %d\n", len);
 					PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
-					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
-						// PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-						PRINTF("%02x%02x%02x%02x%02x%02x%02x%02x", 
-							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
-							raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]);
+
+					PRINTF("output ADPU wit header\n");
+					for(int i = 0; i < raw_tx_ix; i += 1) {
+						if (i%8 == 0) PRINTF("\n");
+						PRINTF("%02x ", raw_tx[i]);
 					}
 					PRINTF("\n");
 
 					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
 					if (G_io_apdu_buffer[2] == P1_LAST) {
 						raw_tx_len = raw_tx_ix;
-						// raw_tx_ix = 0;
-						// hash_data_ix = 0;
-						// curr_scr_ix = 0;
-						// memset(tx_desc, 0x00, sizeof(tx_desc));
-
 						ui_top_blind_signing();
 					}
 

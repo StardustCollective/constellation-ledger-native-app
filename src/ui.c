@@ -1162,7 +1162,7 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 
 		// Hash the message
 		uint8_t hash512Digest[CX_SHA512_SIZE];
-		cx_hash_sha512(raw_tx, raw_tx_ix, hash512Digest, CX_SHA512_SIZE);
+		cx_hash_sha512(raw_tx, raw_tx_ix-20, hash512Digest, CX_SHA512_SIZE);
 
 		PRINTF("SHA512 : %d\n", CX_SHA512_SIZE);
 		for(int i = 0; i < CX_SHA512_SIZE; i += 8) {
@@ -1172,7 +1172,8 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 		}
 
 		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-		unsigned char * bip44_in = G_io_apdu_buffer + (msg_len) + 5 + 4;
+		unsigned char * bip44_in = &(raw_tx[raw_tx_ix]) - 20;
+		// unsigned char * bip44_in = G_io_apdu_buffer + (msg_len) + 5 + 4;
 		unsigned int bip44_path[BIP44_PATH_LEN];
 		uint32_t i;
 		PRINTF("BIP44 again\n");
@@ -1203,6 +1204,8 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 		cx_ecdsa_init_private_key(CX_CURVE_256K1, NULL, 0, &privateKey);
 		memset(privateKeyData, 0x00, sizeof(privateKeyData));
 		
+		hashTainted = 1; // reset for next packet
+
 		// Move the signature to the ADPU buffer
 		memmove(G_io_apdu_buffer, sig, siglen);
 		tx=siglen;
