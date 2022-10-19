@@ -1172,8 +1172,7 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 		}
 
 		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-		unsigned char * bip44_in = G_io_apdu_buffer + (msg_len * 3 / 4) + 5 + 4;
-		// unsigned char * bip44_in = G_io_apdu_buffer + 96 + 3 + 12;
+		unsigned char * bip44_in = G_io_apdu_buffer + (msg_len) + 5 + 4;
 		unsigned int bip44_path[BIP44_PATH_LEN];
 
 		uint32_t i;
