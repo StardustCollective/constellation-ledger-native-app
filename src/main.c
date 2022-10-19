@@ -98,47 +98,6 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 /** instruction to blind sign a message and send back the signature. */
 #define INS_BLIND_SIGN 0x06
 
-// TODO replace with better b64 implementation
-static const char basis_64[] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-int Base64encode_len(int len)
-{
-    return ((len + 2) / 3 * 4) + 1;
-}
-
-int Base64encode(char *encoded, const char *string, int len)
-{
-    int i;
-    char *p;
-	PRINTF("len: %d\n",len);
-    p = encoded;
-    for (i = 0; i < len - 2; i += 3) {
-    *p++ = basis_64[(string[i] >> 2) & 0x3F];
-    *p++ = basis_64[((string[i] & 0x3) << 4) |
-                    ((int) (string[i + 1] & 0xF0) >> 4)];
-    *p++ = basis_64[((string[i + 1] & 0xF) << 2) |
-                    ((int) (string[i + 2] & 0xC0) >> 6)];
-    *p++ = basis_64[string[i + 2] & 0x3F];
-    }
-    if (i < len) {
-    *p++ = basis_64[(string[i] >> 2) & 0x3F];
-    if (i == (len - 1)) {
-        *p++ = basis_64[((string[i] & 0x3) << 4)];
-        *p++ = '=';
-    }
-    else {
-        *p++ = basis_64[((string[i] & 0x3) << 4) |
-                        ((int) (string[i + 1] & 0xF0) >> 4)];
-        *p++ = basis_64[((string[i + 1] & 0xF) << 2)];
-    }
-    *p++ = '=';
-    }
-
-    *p++ = '\0';
-    return p - encoded;
-}
-
 /** #### instructions end #### */
 
 /** some kind of event loop */
@@ -408,10 +367,8 @@ static void constellation_main(void) {
 							raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]); 
 					}
 
-					// convert message to b64 (dag4.keyStore does this)
-					size_t outputsize = Base64encode(out, in, msg_len*3/4);
-					PRINTF("output size %d\n", outputsize);
-					PRINTF("raw tx with b64 encoded message\n");
+					memcpy(out, in, msg_len);
+					PRINTF("raw tx with encoded message\n");
 					for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
 						PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
 							raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
