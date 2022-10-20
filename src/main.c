@@ -332,15 +332,12 @@ static void constellation_main(void) {
 					if (hashTainted) {
 						hashTainted = 0;
 						msg_len = init_msg_sign_buf();
-						PRINTF("msg_len: %d\n", msg_len);
-						PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
 						in = G_io_apdu_buffer + APDU_HEADER_LENGTH + 4;  
 						len = get_apdu_buffer_length() - 4; 				
 					} else {
 						in = G_io_apdu_buffer + APDU_HEADER_LENGTH; 
 						len = get_apdu_buffer_length(); 				
 					}
-					PRINTF("adpu pkt len: %d\n",len);
 
 					// move the contents of the buffer into raw_tx, 
 					// and update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
@@ -350,24 +347,8 @@ static void constellation_main(void) {
 						THROW(0x6D08);
 					}
 
-					PRINTF("input ADPU without header\n");
-					for(int i = 0; i < len; i += 1) {
-						if (i%8 == 0) PRINTF("\n");
-						PRINTF("%02x ", in[i]);
-					}
-					PRINTF("\n");
-
 					memcpy(out, in, len);
 					raw_tx_ix += len;
-
-					PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
-
-					PRINTF("output ADPU wit header\n");
-					for(int i = 0; i < raw_tx_ix; i += 1) {
-						if (i%8 == 0) PRINTF("\n");
-						PRINTF("%02x ", raw_tx[i]);
-					}
-					PRINTF("\n");
 
 					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
 					if (G_io_apdu_buffer[2] == P1_LAST) {

@@ -1150,35 +1150,17 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {				
-		PRINTF("raw_tx_ix: %d\n", raw_tx_ix);
-		for(int i = 0; i < MAX_TX_RAW_LENGTH; i += 8) {
-			// PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-			PRINTF("%02x%02x%02x%02x%02x%02x%02x%02x", 
-				raw_tx[i], raw_tx[i+1], raw_tx[i+2], raw_tx[i+3],
-				raw_tx[i+4], raw_tx[i+5], raw_tx[i+6], raw_tx[i+7]);
-		}
-		PRINTF("\n");
-
 
 		// Hash the message
 		uint8_t hash512Digest[CX_SHA512_SIZE];
 		cx_hash_sha512(raw_tx, raw_tx_ix-20, hash512Digest, CX_SHA512_SIZE);
-
-		PRINTF("SHA512 : %d\n", CX_SHA512_SIZE);
-		for(int i = 0; i < CX_SHA512_SIZE; i += 8) {
-			PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-				hash512Digest[i], hash512Digest[i+1], hash512Digest[i+2], hash512Digest[i+3],
-				hash512Digest[i+4], hash512Digest[i+5], hash512Digest[i+6], hash512Digest[i+7]);
-		}
 
 		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
 		unsigned char * bip44_in = &(raw_tx[raw_tx_ix]) - 20;
 		// unsigned char * bip44_in = G_io_apdu_buffer + (msg_len) + 5 + 4;
 		unsigned int bip44_path[BIP44_PATH_LEN];
 		uint32_t i;
-		PRINTF("BIP44 again\n");
 		for (i = 0; i < BIP44_PATH_LEN; i++) {
-			PRINTF("%02x %02x %02x %02x\n",bip44_in[0],bip44_in[1],bip44_in[2],bip44_in[3]);
 			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 			bip44_in += 4;
 		}
@@ -1189,12 +1171,6 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
-		PRINTF("PRIVATE KEY DATA\n");
-		for(int i = 0; i < 32; i += 8) {
-			PRINTF("%02x %02x %02x %02x %02x %02x %02x %02x \n", 
-				privateKeyData[i], privateKeyData[i+1], privateKeyData[i+2], privateKeyData[i+3],
-				privateKeyData[i+4], privateKeyData[i+5], privateKeyData[i+6], privateKeyData[i+7]);
-		}
 
 		// Sign the message
     	unsigned char sig[SIGNATURE_LEN];

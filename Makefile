@@ -76,7 +76,7 @@ DEFINES       += HAVE_UX_FLOW
 endif
 
 # Enabling debug PRINTF
-DEBUG = 1
+DEBUG = 0
 ifneq ($(DEBUG),0)
 
         ifeq ($(TARGET_NAME),TARGET_NANOS)
