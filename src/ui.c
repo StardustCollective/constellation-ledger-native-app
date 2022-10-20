@@ -1141,8 +1141,6 @@ unsigned int utf8Length(unsigned char * buffer, unsigned int value) {
 	return utfLengthAsHex;
 }
 
-extern int msg_len;
-
 /** Sign the message. The UI is only displayed when all of the message has been sent over for signing. */
 const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	UNUSED(e);
@@ -1150,14 +1148,13 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {				
-
 		// Hash the message
 		uint8_t hash512Digest[CX_SHA512_SIZE];
-		cx_hash_sha512(raw_tx, raw_tx_ix-20, hash512Digest, CX_SHA512_SIZE);
+		cx_hash_sha512(raw_tx, raw_tx_ix-BIP44_BYTE_LENGTH, hash512Digest, CX_SHA512_SIZE);
 
-		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-		unsigned char * bip44_in = &(raw_tx[raw_tx_ix]) - 20;
-		// unsigned char * bip44_in = G_io_apdu_buffer + (msg_len) + 5 + 4;
+		/** BIP44 path, used to derive the private key from the mnemonic 
+		 * 	by calling os_perso_derive_node_bip32. BIP44 path is appended to every message */
+		unsigned char * bip44_in = &(raw_tx[raw_tx_ix]) - BIP44_BYTE_LENGTH;
 		unsigned int bip44_path[BIP44_PATH_LEN];
 		uint32_t i;
 		for (i = 0; i < BIP44_PATH_LEN; i++) {
@@ -1165,16 +1162,15 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 			bip44_in += 4;
 		}
 
+		// Retreive the private key
 		cx_ecfp_private_key_t privateKey;
     	unsigned char privateKeyData[32];
     	memset(privateKeyData, 0, sizeof(privateKeyData));
-
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
 
 		// Sign the message
-    	unsigned char sig[SIGNATURE_LEN];
-    	int siglen = cx_ecdsa_sign(&privateKey, CX_RND_RFC6979, CX_SHA256, hash512Digest, CX_SHA512_SIZE, sig, SIGNATURE_LEN, NULL);
+    	int siglen = cx_ecdsa_sign(&privateKey, CX_RND_RFC6979, CX_SHA256, hash512Digest, CX_SHA512_SIZE, G_io_apdu_buffer, SIGNATURE_LEN, NULL);
 
 		// Clear private key data
 		cx_ecdsa_init_private_key(CX_CURVE_256K1, NULL, 0, &privateKey);
@@ -1183,7 +1179,6 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 		hashTainted = 1; // reset for next packet
 
 		// Move the signature to the ADPU buffer
-		memmove(G_io_apdu_buffer, sig, siglen);
 		tx=siglen;
 	}
 

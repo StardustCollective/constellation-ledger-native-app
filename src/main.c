@@ -135,19 +135,23 @@ static void refresh_public_key_display(void) {
 	}
 }
 
-static int init_msg_sign_buf(void) {
+static int get_msg_length(void) {
+	unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
+	unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;					
+	memmove(message_length_bytes, message_without_apdu, MESSAGE_SIZE_LEN);
+	return (int)((message_length_bytes[0] << 24) 
+				+ (message_length_bytes[1] << 16) 
+				+ (message_length_bytes[2] << 8) 
+				+ (message_length_bytes[3]));
+}
+
+static void init_msg_sign_buf(int message_length) {
 	raw_tx_ix = 0;
-	raw_tx_len = 0;
 
 	unsigned char * out = raw_tx + raw_tx_ix;
 	memcpy(out, message_prefix, MESSAGE_PREFIX_LENGTH);
 	raw_tx_ix += MESSAGE_PREFIX_LENGTH;
 
-	unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
-	unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;					
-	// Get the message length.
-	memmove(message_length_bytes, message_without_apdu, MESSAGE_SIZE_LEN);
-	int message_length = (message_length_bytes[0] << 24) + (message_length_bytes[1] << 16) + (message_length_bytes[2] << 8) + (message_length_bytes[3]);
 	int message_digits_length = getIntLength(message_length);
 	// Convert message length int to ascii values
 	char message_length_ascii_bytes[message_digits_length];
@@ -160,8 +164,6 @@ static int init_msg_sign_buf(void) {
 	out = raw_tx + raw_tx_ix;
 	memcpy(out, message_prefix_delimeter, MESSAGE_PREFIX_DELIMETER_LENGTH);
 	raw_tx_ix += MESSAGE_PREFIX_DELIMETER_LENGTH;
-
-	return message_length;
 }
 
 /** main loop. */
@@ -330,26 +332,26 @@ static void constellation_main(void) {
 					 
 					if (hashTainted) { // if this is the first transaction chunk
 						hashTainted = 0;
+						msg_len = get_msg_length();
 						// append message prefix, message length and delimeters to fresh buffer, 
-						msg_len = init_msg_sign_buf();
+						init_msg_sign_buf(msg_len); // sets raw_tx_ix with packet size
 						in += 4;  // first packet has 4 extra bytes for message length
 						len -= 4; 				
 					} 
 
-					// move the contents of the buffer into raw_tx, 
-					// and update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
-					unsigned char * out = raw_tx + raw_tx_ix;
+					// update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
 					if (raw_tx_ix + len > MAX_TX_RAW_LENGTH) {
 						hashTainted = 1;
 						THROW(0x6D08);
 					}
 
+					// move the contents of the input buffer into raw_tx at raw_tx_ix offset
+					unsigned char * out = raw_tx + raw_tx_ix;
 					memcpy(out, in, len);
-					raw_tx_ix += len;
+					raw_tx_ix += len; // add packet length to raw_tx_ix offset
 
 					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
 					if (G_io_apdu_buffer[2] == P1_LAST) {
-						raw_tx_len = raw_tx_ix;
 						ui_top_blind_signing();
 					}
 

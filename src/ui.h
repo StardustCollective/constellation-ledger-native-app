@@ -119,4 +119,8 @@ void ui_blind_singing_must_enable_message(void);
 /** return the length of the communication buffer */
 unsigned int get_apdu_buffer_length();
 
+int getIntLength (int n);
+
+void intToBytes(char *buf, int n);
+
 #endif // UI_H
