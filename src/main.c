@@ -325,19 +325,16 @@ static void constellation_main(void) {
 						THROW(0x6A86);
 					}
 
-					unsigned char * in; 
-					unsigned int len; 
-					// if this is the first transaction part, 
-					// append message prefix, message length and delimeters to fresh buffer, 
-					if (hashTainted) {
+					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH;; 
+					unsigned int len = get_apdu_buffer_length(); 
+					 
+					if (hashTainted) { // if this is the first transaction chunk
 						hashTainted = 0;
+						// append message prefix, message length and delimeters to fresh buffer, 
 						msg_len = init_msg_sign_buf();
-						in = G_io_apdu_buffer + APDU_HEADER_LENGTH + 4;  
-						len = get_apdu_buffer_length() - 4; 				
-					} else {
-						in = G_io_apdu_buffer + APDU_HEADER_LENGTH; 
-						len = get_apdu_buffer_length(); 				
-					}
+						in += 4;  // first packet has 4 extra bytes for message length
+						len -= 4; 				
+					} 
 
 					// move the contents of the buffer into raw_tx, 
 					// and update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
