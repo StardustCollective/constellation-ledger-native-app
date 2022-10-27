@@ -63,7 +63,7 @@ bool blind_signing_enabled_bool = false;
 /** hash ix to go into kryto serialize */
 unsigned int hash_data_ix;
 
-static const unsigned char KRYO_PREFIX[] = {0x03,0x01};
+static const unsigned char KRYO_PREFIX[] = {0x03};
 
 /** UI was touched indicating the user wants to deny te signature request */
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
