@@ -27,11 +27,28 @@
 #include "selector.h"
 #include "format.h"
 
+/** message security prefix length */
+#define MESSAGE_PREFIX_LENGTH 31
+
+/** message security prefix */
+static const uint8_t message_prefix[MESSAGE_PREFIX_LENGTH] = { 0x19, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x65, 0x6c, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x20, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x3a, 0xa };
+
+/** message prefix delimeter length */
+#define MESSAGE_PREFIX_DELIMETER_LENGTH 1 
+
+/** message prefix delimeter */
+static const uint8_t message_prefix_delimeter[MESSAGE_PREFIX_DELIMETER_LENGTH] = { 0xa };
+
+/** Byte length of message size param */
+#define MESSAGE_SIZE_LEN 4
+
 #define DEBUG_OUT_ENABLED false
 
 #define MAX_EXIT_TIMER 4098
 
 #define EXIT_TIMER_REFRESH_INTERVAL 512
+
+int msg_len = 0; // NOT static
 
 static void Timer_UpdateDescription() {
 	snprintf(timer_desc, MAX_TIMER_TEXT_WIDTH, "%d", exit_timer / EXIT_TIMER_REFRESH_INTERVAL);
@@ -81,8 +98,6 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 /** instruction to blind sign a message and send back the signature. */
 #define INS_BLIND_SIGN 0x06
 
-
-
 /** #### instructions end #### */
 
 /** some kind of event loop */
@@ -118,6 +133,37 @@ static void refresh_public_key_display(void) {
 	if ((uiState == UI_PUBLIC_KEY_1)|| (uiState == UI_PUBLIC_KEY_2)) {
 		publicKeyNeedsRefresh = 1;
 	}
+}
+
+static int get_msg_length(void) {
+	unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
+	unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;					
+	memmove(message_length_bytes, message_without_apdu, MESSAGE_SIZE_LEN);
+	return (int)((message_length_bytes[0] << 24) 
+				+ (message_length_bytes[1] << 16) 
+				+ (message_length_bytes[2] << 8) 
+				+ (message_length_bytes[3]));
+}
+
+static void init_msg_sign_buf(int message_length) {
+	raw_tx_ix = 0;
+
+	unsigned char * out = raw_tx + raw_tx_ix;
+	memcpy(out, message_prefix, MESSAGE_PREFIX_LENGTH);
+	raw_tx_ix += MESSAGE_PREFIX_LENGTH;
+
+	int message_digits_length = getIntLength(message_length);
+	// Convert message length int to ascii values
+	char message_length_ascii_bytes[message_digits_length];
+	intToBytes(message_length_ascii_bytes, message_length);
+
+	out = raw_tx + raw_tx_ix;
+	memcpy(out, message_length_ascii_bytes, message_digits_length);
+	raw_tx_ix += message_digits_length; 
+
+	out = raw_tx + raw_tx_ix;
+	memcpy(out, message_prefix_delimeter, MESSAGE_PREFIX_DELIMETER_LENGTH);
+	raw_tx_ix += MESSAGE_PREFIX_DELIMETER_LENGTH;
 }
 
 /** main loop. */
@@ -267,7 +313,7 @@ static void constellation_main(void) {
 				}
 				break;
 
-				case INS_BLIND_SIGN: {
+				case INS_BLIND_SIGN: { // RFC 6979
 					Timer_Restart();
 					
 					if(!blind_signing_enabled_bool){
@@ -275,12 +321,44 @@ static void constellation_main(void) {
 						break;
 					}
 
+					// check the third byte (0x02) for the instruction subtype.
+					if ((G_io_apdu_buffer[2] != P1_MORE) && (G_io_apdu_buffer[2] != P1_LAST)) {
+						hashTainted = 1;
+						THROW(0x6A86);
+					}
+
+					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH;; 
+					unsigned int len = get_apdu_buffer_length(); 
+					 
+					if (hashTainted) { // if this is the first transaction chunk
+						hashTainted = 0;
+						msg_len = get_msg_length();
+						// append message prefix, message length and delimeters to fresh buffer, 
+						init_msg_sign_buf(msg_len); // sets raw_tx_ix with packet size
+						in += 4;  // first packet has 4 extra bytes for message length
+						len -= 4; 				
+					} 
+
+					// update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
+					if (raw_tx_ix + len > MAX_TX_RAW_LENGTH) {
+						hashTainted = 1;
+						THROW(0x6D08);
+					}
+
+					// move the contents of the input buffer into raw_tx at raw_tx_ix offset
+					unsigned char * out = raw_tx + raw_tx_ix;
+					memcpy(out, in, len);
+					raw_tx_ix += len; // add packet length to raw_tx_ix offset
+
+					// if this is the last part of the transaction, parse the transaction into human readable text, and display it.
 					if (G_io_apdu_buffer[2] == P1_LAST) {
 						ui_top_blind_signing();
 					}
 
 					flags |= IO_ASYNCH_REPLY;
 
+					// if this is not the last part of the transaction, 
+					// send 0x9000
 					if (G_io_apdu_buffer[2] == P1_MORE) {
 						io_seproxyhal_touch_approve2(NULL);
 					}
