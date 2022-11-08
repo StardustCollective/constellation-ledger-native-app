@@ -20,7 +20,7 @@ Any transmissions will be rejected that do not begin with this
 | CLA | INS | COMMAND NAME        | DESCRIPTION |
 |-----|-----|---------------------|-------------|
 | 0x80|  02 | `INS_SIGN` 	      | Sign a txn (more info?) |
-| 0x80|  04 | `INS_GET_PUBLIC_KEY` | Return extended pubkey |
+| 0x80|  04 | `INS_GET_PUBLIC_KEY` | Return extended pubkey from a BIP44 path |
 | 0x80|  06 | `INS_BLIND_SIGN`    | Sign a message with a key (from a BIP32 path?) |
 
 ## Status Words
@@ -80,11 +80,11 @@ Returns an extended public key at the given derivation path, serialized as per B
 
 | Length | Name              | Description |
 |--------|-------------------|-------------|
-| `4`    | `bip44_path[0]`   | purpose |
-| `4`    | `bip44_path[1]`   | coin type |
-| `4`    | `bip44_path[2]`   | account |
-| `4`    | `bip44_path[3]`   | change |
-| `4`    | `bip44_path[4]`   | address index |
+| `4`    | `bip44_path[0]`   | `purpose` |
+| `4`    | `bip44_path[1]`   | `coin type` |
+| `4`    | `bip44_path[2]`   | `account` |
+| `4`    | `bip44_path[3]`   | `change` |
+| `4`    | `bip44_path[4]`   | `address_index` |
 
 **Output data**
 
@@ -99,7 +99,7 @@ The paths defined in [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-00
 
 ### INS_BLIND_SIGN
 
-Returns a blind signature of the hashed input appended to a prefix.
+Returns a blind signature of a message appended to a prefix, then hashed.
 
 #### Encoding
 
@@ -123,6 +123,8 @@ The first packet will always contain the `length` and begin the `payload` sectio
 |--------|-------------------|-------------|
 | `4`    | `length`   		 | total length of payload to be signed |
 | `<variable>` | `payload`   | message to be signed, can span multiple packets | 
+
+Max `length` is 768 bytes minus 20 bytes of bip44 path, minus 32 bytes of message prefix and is currently 706 bytes for the actual message to be signed
 
 BIP44 path is the last data transmitted in either a single or multiple packet scenerio,
 appended directly to `payload`.
