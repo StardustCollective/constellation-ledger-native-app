@@ -18,20 +18,6 @@
 /** text description font. */
 #define TX_DESC_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER
 
-/** message security prefix length */
-#define MESSAGE_PREFIX_LENGTH 31
-
-/** message security prefix */
-static const uint8_t message_prefix[MESSAGE_PREFIX_LENGTH] = { 0x19, 0x43, 0x6f, 0x6e, 0x73, 0x74, 0x65, 0x6c, 0x6c, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x20, 0x53, 0x69, 0x67, 0x6e, 0x65, 0x64, 0x20, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x3a, 0xa };
-
-/** message prefix delimeter length */
-#define MESSAGE_PREFIX_DELIMETER_LENGTH 1 
-
-/** message prefix delimeter */
-static const uint8_t message_prefix_delimeter[MESSAGE_PREFIX_DELIMETER_LENGTH] = { 0xa };
-
-/** Byte length of message size param */
-#define MESSAGE_SIZE_LEN 4
 
 /** Signature Length */ 
 #define SIGNATURE_LEN 256
@@ -77,7 +63,7 @@ bool blind_signing_enabled_bool = false;
 /** hash ix to go into kryto serialize */
 unsigned int hash_data_ix;
 
-static const unsigned char KRYO_PREFIX[] = {0x03,0x01};
+static const unsigned char KRYO_PREFIX[] = {0x03};
 
 /** UI was touched indicating the user wants to deny te signature request */
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
@@ -1155,7 +1141,6 @@ unsigned int utf8Length(unsigned char * buffer, unsigned int value) {
 	return utfLengthAsHex;
 }
 
-
 /** Sign the message. The UI is only displayed when all of the message has been sent over for signing. */
 const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	UNUSED(e);
@@ -1163,65 +1148,37 @@ const bagl_element_t*io_seproxyhal_touch_approve2(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {				
-		cx_ecfp_private_key_t privateKey;
-    	unsigned char privateKeyData[32];
-		unsigned char message_length_bytes[MESSAGE_SIZE_LEN];
-		unsigned char * message_without_apdu = G_io_apdu_buffer + APDU_HEADER_LENGTH;
-		
-		// Get the message length.
-		memmove(message_length_bytes, message_without_apdu, MESSAGE_SIZE_LEN);
-	
-		int message_length = (message_length_bytes[0] << 24) + (message_length_bytes[1] << 16) + (message_length_bytes[2] << 8) + (message_length_bytes[3]);
-		int message_digits_length = getIntLength(message_length);
+		// Hash the message
+		uint8_t hash512Digest[CX_SHA512_SIZE];
+		cx_hash_sha512(raw_tx, raw_tx_ix-BIP44_BYTE_LENGTH, hash512Digest, CX_SHA512_SIZE);
 
-		// Convert message length int to ascii values
-		char message_length_ascii_bytes[message_digits_length];
-		intToBytes(message_length_ascii_bytes, message_length);
-
-		// Get the message data.
-		unsigned char * messsage_with_bip44 = message_without_apdu + MESSAGE_SIZE_LEN;
-		uint8_t message_data[message_length];
-		memmove(message_data, messsage_with_bip44, message_length);
-
-		// Initial message buffer
-		uint8_t message[MESSAGE_PREFIX_LENGTH + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH + message_length];
-		
-		// Concat prefix, message length, delimeter and message
-		memcpy(message, message_prefix, MESSAGE_PREFIX_LENGTH);
-		memcpy(message + MESSAGE_PREFIX_LENGTH, message_length_ascii_bytes, message_digits_length);
-		memcpy(message + MESSAGE_PREFIX_LENGTH + message_digits_length, message_prefix_delimeter, MESSAGE_PREFIX_DELIMETER_LENGTH);
-		memcpy(message + MESSAGE_PREFIX_LENGTH + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH , message_data, message_length);
-
-		// Get the Bip44 Path
-		unsigned char * bip44_in = message_without_apdu + (message_length + MESSAGE_SIZE_LEN);
-		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
+		/** BIP44 path, used to derive the private key from the mnemonic 
+		 * 	by calling os_perso_derive_node_bip32. BIP44 path is appended to every message */
+		unsigned char * bip44_in = &(raw_tx[raw_tx_ix]) - BIP44_BYTE_LENGTH;
 		unsigned int bip44_path[BIP44_PATH_LEN];
-
 		uint32_t i;
 		for (i = 0; i < BIP44_PATH_LEN; i++) {
 			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 			bip44_in += 4;
 		}
 
-		// Hash the message
-		uint8_t hash512Digest[CX_SHA512_SIZE];
-		cx_hash_sha512(message, MESSAGE_PREFIX_LENGTH + message_length + message_digits_length + MESSAGE_PREFIX_DELIMETER_LENGTH, hash512Digest, CX_SHA512_SIZE);
-
 		// Retreive the private key
+		cx_ecfp_private_key_t privateKey;
+    	unsigned char privateKeyData[32];
+    	memset(privateKeyData, 0, sizeof(privateKeyData));
     	os_perso_derive_node_bip32(CX_CURVE_256K1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
     	cx_ecdsa_init_private_key(CX_CURVE_256K1, privateKeyData, 32, &privateKey);
-    	memset(privateKeyData, 0, sizeof(privateKeyData));
 
 		// Sign the message
-    	unsigned char sig[SIGNATURE_LEN];
-    	int siglen = cx_ecdsa_sign(&privateKey, CX_RND_RFC6979, CX_SHA256, hash512Digest, CX_SHA512_SIZE, sig, SIGNATURE_LEN, NULL);
+    	int siglen = cx_ecdsa_sign(&privateKey, CX_RND_RFC6979, CX_SHA256, hash512Digest, CX_SHA512_SIZE, G_io_apdu_buffer, SIGNATURE_LEN, NULL);
 
 		// Clear private key data
 		cx_ecdsa_init_private_key(CX_CURVE_256K1, NULL, 0, &privateKey);
 		memset(privateKeyData, 0x00, sizeof(privateKeyData));
 		
+		hashTainted = 1; // reset for next packet
+
 		// Move the signature to the ADPU buffer
-		memmove(G_io_apdu_buffer, sig, siglen);
 		tx=siglen;
 	}
 
