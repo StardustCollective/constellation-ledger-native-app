@@ -371,14 +371,14 @@ UX_STEP_NOCB(
         "is ready",
 	});
 UX_STEP_NOCB(
-    ux_idle_flow_3_step,
+    ux_idle_flow_2_step,
     bn,
     {
         "Version",
         APPVERSION,
 	});
 UX_STEP_VALID(
-    ux_idle_flow_4_step,
+    ux_idle_flow_3_step,
     bb,
     ui_blind_signing_settings(),
     {
@@ -387,7 +387,7 @@ UX_STEP_VALID(
         ""
 	});
 UX_STEP_VALID(
-    ux_idle_flow_5_step,
+    ux_idle_flow_4_step,
     bn,
     os_sched_exit(-1),
     {
@@ -398,9 +398,9 @@ UX_STEP_VALID(
 
 UX_FLOW(ux_idle_flow,
         &ux_idle_flow_1_step,
+        &ux_idle_flow_2_step,
         &ux_idle_flow_3_step,
-        &ux_idle_flow_4_step,
-		&ux_idle_flow_5_step
+		&ux_idle_flow_4_step
         );
 
 #endif
