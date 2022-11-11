@@ -370,15 +370,6 @@ UX_STEP_NOCB(
         "Application",
         "is ready",
 	});
-UX_STEP_VALID(
-    ux_idle_flow_2_step,
-    nn,
-    display_account_address(),
-    {
-        // &C_icon_eye,
-        "Display",
-        "Account"
-	});
 UX_STEP_NOCB(
     ux_idle_flow_3_step,
     bn,
@@ -407,7 +398,6 @@ UX_STEP_VALID(
 
 UX_FLOW(ux_idle_flow,
         &ux_idle_flow_1_step,
-        &ux_idle_flow_2_step,
         &ux_idle_flow_3_step,
         &ux_idle_flow_4_step,
 		&ux_idle_flow_5_step
