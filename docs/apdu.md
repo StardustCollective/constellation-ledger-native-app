@@ -19,9 +19,9 @@ Any transmissions will be rejected that do not begin with this
 
 | CLA | INS | COMMAND NAME        | DESCRIPTION |
 |-----|-----|---------------------|-------------|
-| 0x80|  02 | `INS_SIGN` 	      | Sign a txn (more info?) |
+| 0x80|  02 | `INS_SIGN` 	      | Sign a txn with a key from a BIP44 path |
 | 0x80|  04 | `INS_GET_PUBLIC_KEY` | Return extended pubkey from a BIP44 path |
-| 0x80|  06 | `INS_BLIND_SIGN`    | Sign a message with a key (from a BIP32 path?) |
+| 0x80|  06 | `INS_BLIND_SIGN`    | Sign a message with a key from a BIP44 path |
 
 ## Status Words
 
@@ -38,7 +38,7 @@ Any transmissions will be rejected that do not begin with this
 
 ## Commands
 
-### INS_SIGN (? TODO)
+### INS_SIGN 
 
 Returns a signature of the hashed txn input (appended to a prefix?).
 
@@ -50,9 +50,51 @@ Returns a signature of the hashed txn input (appended to a prefix?).
 
 **Input data**  
 
+All packets in single or multiple packet scenerio begin with `P1` and `body_length`. 
+Max `body_length` is 255 bytes.
+
 | Length | Name              | Description |
 |--------|-------------------|-------------|
-(?)
+| `1`    | `P1`				 | `P1_MORE` or `P1_LAST` |
+| `1`	 | `body_length`	 | length of current packet body |
+
+The first packet will always contain the `length` and begin the `payload` section. 
+
+| Length | Name              | Description |
+|--------|-------------------|-------------|
+| `4`    | `length`   		 | total length of payload to be signed |
+| `<variable>` | `payload`   | message to be signed, can span multiple packets | 
+
+Max `length` is 768 bytes minus 20 bytes of bip44 path, minus 32 bytes of message prefix and is currently 706 bytes for the actual message to be signed
+
+BIP44 path is the last data transmitted in either a single or multiple packet scenerio,
+appended directly to `payload`.
+| Length | Name              | Description |
+|--------|-------------------|-------------|
+| `4`    | `bip44_path[0]`   | `purpose` |
+| `4`    | `bip44_path[1]`   | `coin type` |
+| `4`    | `bip44_path[2]`   | `account` |
+| `4`    | `bip44_path[3]`   | `change` |
+| `4`    | `bip44_path[4]`   | `address_index` |
+
+`payload` consists of transaction details as follows
+| Length 				| Name              | Description |
+|--------				|-------------------|-------------|
+| `4` 					| `parentCount` 	| always 2 parents | 
+| `4` 					| `sourceAddressLength` | | 
+| `sourceAddressLength` | `sourceAddress` 	| | 
+| `4` 					| `destAddressLength` | | 
+| `destAddressLength` 	| `destAddress` 	| | 
+| `4` 					| `amountLength` 	| | 
+| `amountLength` 		| `amount` 			| | 
+| `4` 					| `parentHashLength` | | 
+| `parentHashLength` 	| `parentHash` 		| | 
+| `4` 					| `ordinalLength` 	| | 
+| `ordinalLength` 		| `ordinal` 		| | 
+| `4` 					| `feeLength` 		| | 
+| `feeLength` 			| `fee` 			| | 
+| `4` 					| `saltLength` 		| | 
+| `saltLength` 			| `salt` 			| | 
 
 **Output data**
 
@@ -66,7 +108,7 @@ Returns a signature of the hashed txn input (appended to a prefix?).
 
 ### INS_GET_PUBLIC_KEY
 
-Returns an extended public key at the given derivation path, serialized as per BIP-32.
+Returns an extended public key at the given derivation path, per BIP-44.
 
 #### Encoding
 
@@ -90,12 +132,12 @@ Returns an extended public key at the given derivation path, serialized as per B
 
 | Length | Description |
 |--------|-------------|
-| `<variable>` | The full serialized extended public key as per BIP-32 |
+| `<variable>` | The full serialized extended public key as per BIP-44 |
 
 #### Description
 
-This command returns the extended public key for the given BIP 32 path.(?)
-The paths defined in [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki), [BIP-48](https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki), [BIP-49](https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki), [BIP-84](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) and [BIP-86](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki), either in full or are at the deepest hardened level (excluding `change` and `address_index`), are considered standard.(?)
+This command returns the extended public key for the given BIP 44 path.
+The paths defined in [BIP-44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki), [BIP-48](https://github.com/bitcoin/bips/blob/master/bip-0048.mediawiki), [BIP-49](https://github.com/bitcoin/bips/blob/master/bip-0049.mediawiki), [BIP-84](https://github.com/bitcoin/bips/blob/master/bip-0084.mediawiki) and [BIP-86](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki), either in full or are at the deepest hardened level (excluding `change` and `address_index`), are considered standard.
 
 ### INS_BLIND_SIGN
 
@@ -130,11 +172,11 @@ BIP44 path is the last data transmitted in either a single or multiple packet sc
 appended directly to `payload`.
 | Length | Name              | Description |
 |--------|-------------------|-------------|
-| `4`    | `bip44_path[0]`   | purpose |
-| `4`    | `bip44_path[1]`   | coin type |
-| `4`    | `bip44_path[2]`   | account |
-| `4`    | `bip44_path[3]`   | change |
-| `4`    | `bip44_path[4]`   | address index |
+| `4`    | `bip44_path[0]`   | `purpose` |
+| `4`    | `bip44_path[1]`   | `coin type` |
+| `4`    | `bip44_path[2]`   | `account` |
+| `4`    | `bip44_path[3]`   | `change` |
+| `4`    | `bip44_path[4]`   | `address_index` |
 
 **Output data**
 
