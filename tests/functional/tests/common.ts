@@ -10,6 +10,10 @@ const Resolve = require("path").resolve;
 const APP_PATH_S = Resolve("../elfs/nanos.elf");
 const APP_PATH_X = Resolve("../elfs/nanox.elf");
 const APP_PATH_SP = Resolve("../elfs/nanosp.elf");
+console.log('App Binary Paths: ');
+console.log(APP_PATH_S);
+console.log(APP_PATH_X);
+console.log(APP_PATH_SP);
 
 export const models = {
   nano_s: { name: "nanos", prefix: "S", path: APP_PATH_S },
