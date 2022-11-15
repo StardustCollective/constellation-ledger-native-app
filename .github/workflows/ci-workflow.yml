@@ -49,3 +49,25 @@ jobs:
         with:
           name: scan-build
           path: scan-build
+# =====================================================
+#            ZEMU TESTS
+# =====================================================
+
+  building_for_e2e_zemu_tests:
+    name: Building binaries for E2E Zemu tests
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder-lite:latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build testing binaries
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          cd tests/functional/ && ./build_test_elfs.sh
+      - name: Upload app binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: e2e_zemu_elfs
+          path: ./tests/functional/elfs/
