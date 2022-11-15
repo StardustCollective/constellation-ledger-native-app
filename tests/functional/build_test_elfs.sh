@@ -31,7 +31,7 @@ do
     echo "** Building app elf for $(basename "$nano_sdk")..."
     make clean BOLOS_SDK="$nano_sdk"
     BOLOS_SDK="$nano_sdk" make
-    cp bin/app.elf "$TESTS_PATH/elfs/constellation_${elf_suffix}.elf"
+    cp bin/app.elf "$TESTS_PATH/elfs/${elf_suffix}.elf"
 
 done
 

@@ -7,9 +7,9 @@ const TX_CHUNK_2 =
 const MSG_CHUNK_1 = "0000002565794a6a623235305a573530496a6f6955326";
 
 const Resolve = require("path").resolve;
-const APP_PATH_S = Resolve("../../builds/app_s.elf");
-const APP_PATH_X = Resolve("../../builds/app_x.elf");
-const APP_PATH_SP = Resolve("../../builds/app_sp.elf");
+const APP_PATH_S = Resolve("../elfs/nanos.elf");
+const APP_PATH_X = Resolve("../elfs/nanox.elf");
+const APP_PATH_SP = Resolve("../elfs/nanosp.elf");
 
 export const models = {
   nano_s: { name: "nanos", prefix: "S", path: APP_PATH_S },
