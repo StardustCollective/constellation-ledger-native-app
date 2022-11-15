@@ -32,7 +32,7 @@ do
     make clean BOLOS_SDK="$nano_sdk"
     BOLOS_SDK="$nano_sdk" make
     cp bin/app.elf "$TESTS_PATH/elfs/${elf_suffix}.elf"
-    echo "** Moved elf to path $(basename $TESTS_PATH/elfs/$elf_suffix).elf"
+    echo "** Moved elf to path $(basename "$TESTS_PATH"/elfs/"$elf_suffix").elf"
 
 done
 
