@@ -94,11 +94,8 @@ jobs:
         with:
           node-version: "14.4.0"
 
-      - name: Install yarn
-        run: npm install -g yarn
-
       - name: Build/Install build js deps
-        run: cd tests/functional/ && yarn install
+        run: cd tests/functional/ && npm install
 
       - name: Create tmp folder for artifacts
         run: mkdir tests/functional/elfs
