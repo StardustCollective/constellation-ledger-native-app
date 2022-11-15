@@ -65,7 +65,7 @@ jobs:
       - name: Build testing binaries
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          cd tests/functional/ && ./build_test_elfs.sh
+          cd tests/functional/ &&  bash build_test_elfs.sh
       - name: Upload app binaries
         uses: actions/upload-artifact@v2
         with:
