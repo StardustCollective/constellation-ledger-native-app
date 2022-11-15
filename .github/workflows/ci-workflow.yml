@@ -49,6 +49,7 @@ jobs:
         with:
           name: scan-build
           path: scan-build
+        
 # =====================================================
 #            ZEMU TESTS
 # =====================================================
@@ -71,3 +72,44 @@ jobs:
         with:
           name: e2e_zemu_elfs
           path: ./tests/functional/elfs/
+
+  jobs-e2e-zemu-tests:
+    name: E2E Zemu tests
+    needs: [building_for_e2e_zemu_tests]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test
+        run: |
+          id
+          echo $HOME
+          echo $DISPLAY
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - run: sudo apt-get update -y && sudo apt-get install -y libusb-1.0.0 libudev-dev
+
+      - name: Install node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14.4.0"
+
+      - name: Install yarn
+        run: npm install -g yarn
+
+      - name: Build/Install build js deps
+        run: cd tests/functional/ && yarn install
+
+      - name: Create tmp folder for artifacts
+        run: mkdir tests/functional/elfs
+
+      - name: Download app binaries
+        uses: actions/download-artifact@v2
+        with:
+          path: tmp/
+
+      - name: Gather elfs
+        run: cp `find tmp/e2e_zemu_elfs/ -name "*.elf"` tests/functional/elfs/
+
+      - name: Run zemu tests
+        run: cd tests/functional/ && yarn test
