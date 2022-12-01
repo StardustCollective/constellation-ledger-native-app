@@ -40,8 +40,7 @@ describe("Nano X", function () {
         .then((buffer) => {
           const signature = buffer.toString("hex");
           expect(signature).toEqual(EXPECTED_TRANSACTION_SIGNATURE);
-        });
-
+        })
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
       // Sign transaction
@@ -64,7 +63,6 @@ describe("Nano X", function () {
       // Enable Blind Signing
       await sim.clickRight();
       await sim.clickRight();
-      await sim.clickRight();
       await sim.clickBoth();
       await sim.clickBoth();
       await sim.clickRight();
@@ -75,7 +73,10 @@ describe("Nano X", function () {
         .then((buffer) => {
           const signature = buffer.toString("hex");
           expect(signature).toEqual(EXPECTED_MESSAGE_SIGNATURE);
+        }).catch((e) => {
+          console.log(e);
         });
+
 
       await sim.waitUntilScreenIsNot(sim.getMainMenuSnapshot());
 
@@ -130,7 +131,6 @@ describe("Nano X", function () {
     try {
       await sim.start({ ...defaultOptions, model: models.nano_x.name });
       await sim.clickRight();
-      await sim.clickRight();
       await sim.navigateAndCompareSnapshots(
         ".",
         `${models.nano_x.prefix.toLowerCase()}-Version-Screen`,
@@ -146,7 +146,6 @@ describe("Nano X", function () {
       const sim = new Zemu(models.nano_x.path);
       try {
         await sim.start({ ...defaultOptions, model: models.nano_x.name });
-        await sim.clickRight();
         await sim.clickRight();
         await sim.clickRight();
 
@@ -168,7 +167,6 @@ describe("Nano X", function () {
         await sim.start({ ...defaultOptions, model: models.nano_x.name });
         await sim.clickRight();
         await sim.clickRight();
-        await sim.clickRight();
         await sim.clickBoth();
         await sim.navigateAndCompareSnapshots(
           ".",
@@ -186,7 +184,6 @@ describe("Nano X", function () {
       const sim = new Zemu(models.nano_x.path);
       try {
         await sim.start({ ...defaultOptions, model: models.nano_x.name });
-        await sim.clickRight();
         await sim.clickRight();
         await sim.clickRight();
         await sim.clickBoth();
@@ -413,7 +410,6 @@ describe("Nano X", function () {
       // Enable Blind Signing
       await sim.clickRight();
       await sim.clickRight();
-      await sim.clickRight();
       await sim.clickBoth();
       await sim.clickBoth();
       await sim.clickRight();
@@ -449,7 +445,6 @@ describe("Nano X", function () {
       const transport = sim.getTransport();
 
       // Enable Blind Signing
-      await sim.clickRight();
       await sim.clickRight();
       await sim.clickRight();
       await sim.clickBoth();
@@ -489,7 +484,6 @@ describe("Nano X", function () {
       const transport = sim.getTransport();
 
       // Enable Blind Signing
-      await sim.clickRight();
       await sim.clickRight();
       await sim.clickRight();
       await sim.clickBoth();

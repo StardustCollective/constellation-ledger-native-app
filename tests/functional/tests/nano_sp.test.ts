@@ -64,7 +64,6 @@ describe("Nano S Plus", function () {
       // Enable Blind Signing
       await sim.clickRight();
       await sim.clickRight();
-      await sim.clickRight();
       await sim.clickBoth();
       await sim.clickBoth();
       await sim.clickRight();
@@ -130,7 +129,6 @@ describe("Nano S Plus", function () {
     try {
       await sim.start({ ...defaultOptions, model: models.nano_sp.name });
       await sim.clickRight();
-      await sim.clickRight();
       await sim.navigateAndCompareSnapshots(
         ".",
         `${models.nano_sp.prefix.toLowerCase()}-Version-Screen`,
@@ -146,7 +144,6 @@ describe("Nano S Plus", function () {
       const sim = new Zemu(models.nano_sp.path);
       try {
         await sim.start({ ...defaultOptions, model: models.nano_sp.name });
-        await sim.clickRight();
         await sim.clickRight();
         await sim.clickRight();
 
@@ -168,7 +165,6 @@ describe("Nano S Plus", function () {
         await sim.start({ ...defaultOptions, model: models.nano_sp.name });
         await sim.clickRight();
         await sim.clickRight();
-        await sim.clickRight();
         await sim.clickBoth();
         await sim.navigateAndCompareSnapshots(
           ".",
@@ -186,7 +182,6 @@ describe("Nano S Plus", function () {
       const sim = new Zemu(models.nano_sp.path);
       try {
         await sim.start({ ...defaultOptions, model: models.nano_sp.name });
-        await sim.clickRight();
         await sim.clickRight();
         await sim.clickRight();
         await sim.clickBoth();
@@ -413,7 +408,6 @@ describe("Nano S Plus", function () {
       // Enable Blind Signing
       await sim.clickRight();
       await sim.clickRight();
-      await sim.clickRight();
       await sim.clickBoth();
       await sim.clickBoth();
       await sim.clickRight();
@@ -449,7 +443,6 @@ describe("Nano S Plus", function () {
       const transport = sim.getTransport();
 
       // Enable Blind Signing
-      await sim.clickRight();
       await sim.clickRight();
       await sim.clickRight();
       await sim.clickBoth();
@@ -489,7 +482,6 @@ describe("Nano S Plus", function () {
       const transport = sim.getTransport();
 
       // Enable Blind Signing
-      await sim.clickRight();
       await sim.clickRight();
       await sim.clickRight();
       await sim.clickBoth();
